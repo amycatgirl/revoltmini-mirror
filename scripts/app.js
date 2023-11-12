@@ -4,6 +4,11 @@ import { token } from "./index.js";
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
 
+/** @type {HTMLSelectElement} */
+const serverNav = document.querySelector("select#server");
+/** @type {HTMLSelectElement} */
+const channelNav = document.querySelector("select#channel");
+
 function togglePage() {
   app.classList.toggle("hidden");
   loginPage.classList.toggle("hidden");
@@ -75,6 +80,9 @@ async function startSocket() {
 
         console.log("debug/cache: Emojis cached", emojis);
         console.log("debug/cache: Everything is in cache!");
+
+        console.log("debug: Loading servers into navigation");
+        loadServers();
         break;
     }
 
@@ -92,4 +100,19 @@ async function startSocket() {
 // Once we have a token and we have logged in, then we can start loading
 // Channels, servers, etc...
 
+function loadServers() {
+  // Clear placeholders
+  serverNav.replaceChildren();
+  // Load from cache
+  for (const [id, server] of servers.entries()) {
+    const option = document.createElement("option");
+
+    option.value = id;
+    option.innerText = server.name;
+
+    serverNav.append(option);
+  }
+
+  serverNav.name = Array.from(servers.keys())[0];
+}
 export { togglePage, startSocket };
