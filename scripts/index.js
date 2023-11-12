@@ -1,4 +1,4 @@
-import { togglePage } from "./app.js";
+import { startSocket, togglePage } from "./app.js";
 import { TOKEN_LOCATION } from "./globals.js";
 import { login } from "./login.js";
 import { getCookie } from "./utils.js";
@@ -24,13 +24,16 @@ let token = "";
 values = [email.value, password.value];
 
 // Wait 5 seconds juuuuuust in case
-setTimeout(() => {
+setTimeout(async () => {
   /** @type {string | undefined} */
   const lastSession = getCookie(TOKEN_LOCATION);
 
   if (lastSession) {
     token = atob(decodeURIComponent(lastSession));
     console.log("token from cookie", token);
+
+    startSocket();
+
     togglePage();
   }
 }, 5000);
@@ -38,7 +41,10 @@ setTimeout(() => {
 form.addEventListener("submit", async (ev) => {
   ev.preventDefault();
   // Funny logic goes here
-  login(values).then((res) => (token = res));
+  await login(values).then((res) => (token = res));
+
+  startSocket();
+
   console.log(values, document.cookie);
 
   togglePage();
