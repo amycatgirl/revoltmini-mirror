@@ -38,8 +38,7 @@ if (lastSession) {
 form.addEventListener("submit", async (ev) => {
   ev.preventDefault();
   token = await login(values);
-
-  startSocket();
+  if (token) startSocket();
 });
 
 email.addEventListener("change", (ev) => {

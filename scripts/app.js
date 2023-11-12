@@ -1,4 +1,11 @@
-import { channels, emojis, servers, users } from "./cache.js";
+import {
+  channels,
+  emojis,
+  members,
+  messages,
+  servers,
+  users,
+} from "./cache.js";
 import { token } from "./index.js";
 
 const app = document.querySelector("main#app");
@@ -8,6 +15,10 @@ const loginPage = document.querySelector("main#login");
 const serverNav = document.querySelector("select#server");
 /** @type {HTMLSelectElement} */
 const channelNav = document.querySelector("select#channel");
+
+/** @type {HTMLElement} */
+const MessageDisplay = document.querySelector("section#middle");
+
 /** @type {number} */
 let interval;
 
@@ -146,9 +157,52 @@ async function loadChannels(server) {
   }
 }
 
+/**
+  @param {string} channel - Channel ID
+*/
+async function loadMessagesFromChannel(channel) {
+  MessageDisplay.replaceChildren();
+
+  const response = await fetch(
+    `https://api.revolt.chat/channels/${channel}/messages?limit=100&include_users=true`,
+    { headers: [["x-session-token", token]] },
+  ).then(async (res) => await res.json());
+
+  // Response is divided as follows
+  // { messages: Message[], users: User[], members: Member[] }
+
+  for (const user of response.users) {
+    users.set(user._id, user);
+  }
+
+  for (const member of response.members) {
+    members.set(member._id, member);
+  }
+
+  for (const message of response.messages) {
+    messages.set(message._id, message);
+
+    // Wouldn't it be better if i use webcomponents for this
+    // TL;DR why
+
+    const renderer = document.createElement("message-renderer");
+    renderer.setAttribute("author", message.author);
+    renderer.setAttribute("message", message._id);
+
+    console.log("debug: appending renderer", renderer);
+
+    MessageDisplay.append(renderer);
+  }
+}
+
 serverNav.addEventListener("change", async (ev) => {
   if (ev.currentTarget.value === "DEFAULT") return;
 
   await loadChannels(ev.target.value);
+});
+
+channelNav.addEventListener("change", async (ev) => {
+  // Something something load messages and display them
+  loadMessagesFromChannel(ev.target.value);
 });
 export { togglePage, startSocket };
