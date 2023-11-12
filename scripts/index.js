@@ -23,31 +23,23 @@ let token = "";
 // Use initial value just in case
 values = [email.value, password.value];
 
-// Wait 5 seconds juuuuuust in case
-setTimeout(async () => {
-  /** @type {string | undefined} */
-  const lastSession = getCookie(TOKEN_LOCATION);
+/** @type {string | undefined} */
+const lastSession = getCookie(TOKEN_LOCATION);
 
-  if (lastSession) {
-    token = atob(decodeURIComponent(lastSession));
-    console.log("token from cookie", token);
-
-    startSocket();
-
-    togglePage();
-  }
-}, 5000);
-
-form.addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  // Funny logic goes here
-  await login(values).then((res) => (token = res));
+if (lastSession) {
+  token = atob(decodeURIComponent(lastSession));
+  console.log("token from cookie", token);
 
   startSocket();
 
-  console.log(values, document.cookie);
-
   togglePage();
+}
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  token = await login(values);
+
+  startSocket();
 });
 
 email.addEventListener("change", (ev) => {
