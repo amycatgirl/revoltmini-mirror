@@ -1,4 +1,4 @@
-import { channels, emojis, messages, servers, users } from "./cache.js";
+import { channels, emojis, servers, users } from "./cache.js";
 import { token } from "./index.js";
 
 const app = document.querySelector("main#app");
@@ -7,6 +7,8 @@ const loginPage = document.querySelector("main#login");
 function togglePage() {
   app.classList.toggle("hidden");
   loginPage.classList.toggle("hidden");
+
+  console.log("Toggled opened page");
 }
 
 /**
@@ -33,6 +35,7 @@ async function startSocket() {
 
   socket.addEventListener("open", () => {
     console.log("debug: Opened connection with Bonfire");
+    console.log("debug: attempting authentication");
     socket.send(JSON.stringify({ type: "Authenticate", token }));
   });
 
@@ -74,6 +77,9 @@ async function startSocket() {
         console.log("debug/cache: Everything is in cache!");
         break;
     }
+
+    // idk why i do this but eh, it's funny
+    return socket;
   });
 
   socket.addEventListener("error", () => {
