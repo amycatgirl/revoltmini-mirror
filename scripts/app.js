@@ -121,7 +121,7 @@ function loadServers() {
 }
 
 async function loadChannels(server) {
-  channelNav.append("<option value='DEFAULT'>Select a channel</option>");
+  channelNav.replaceChildren();
 
   const info =
     servers.get(server) ||
