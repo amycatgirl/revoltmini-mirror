@@ -8,6 +8,8 @@ const loginPage = document.querySelector("main#login");
 const serverNav = document.querySelector("select#server");
 /** @type {HTMLSelectElement} */
 const channelNav = document.querySelector("select#channel");
+/** @type {number} */
+let interval;
 
 function togglePage() {
   app.classList.toggle("hidden");
@@ -42,6 +44,11 @@ async function startSocket() {
     console.log("debug: Opened connection with Bonfire");
     console.log("debug: attempting authentication");
     socket.send(JSON.stringify({ type: "Authenticate", token }));
+
+    console.log("debug: registering interval to about disconnection");
+    interval = setInterval(() => {
+      socket.send(JSON.stringify({ type: "Ping", data: Date.now() }));
+    });
   });
 
   socket.addEventListener("message", async (ev) => {
@@ -85,9 +92,6 @@ async function startSocket() {
         loadServers();
         break;
     }
-
-    // idk why i do this but eh, it's funny
-    return socket;
   });
 
   socket.addEventListener("error", () => {
@@ -97,12 +101,14 @@ async function startSocket() {
   });
 }
 
+function stopPinging() {
+  clearInterval(interval);
+}
+
 // Once we have a token and we have logged in, then we can start loading
 // Channels, servers, etc...
 
 function loadServers() {
-  // Clear placeholders
-  serverNav.replaceChildren();
   // Load from cache
   for (const [id, server] of servers.entries()) {
     const option = document.createElement("option");
@@ -112,7 +118,37 @@ function loadServers() {
 
     serverNav.append(option);
   }
-
-  serverNav.name = Array.from(servers.keys())[0];
 }
+
+async function loadChannels(server) {
+  channelNav.append("<option value='DEFAULT'>Select a channel</option>");
+
+  const info =
+    servers.get(server) ||
+    (await fetch(`https://api.revolt.chat/servers/${server}`).then(
+      async (res) => await res.json(),
+    ));
+
+  if (!info) throw "No information, somehow";
+
+  for (const id of info.channels) {
+    // TODO: Add fallback
+    const channel = channels.get(id);
+
+    if (channel.channel_type !== "TextChannel") return;
+
+    const option = document.createElement("option");
+
+    option.value = id;
+    option.innerText = `#${channel.name}`;
+
+    channelNav.append(option);
+  }
+}
+
+serverNav.addEventListener("change", async (ev) => {
+  if (ev.currentTarget.value === "DEFAULT") return;
+
+  await loadChannels(ev.target.value);
+});
 export { togglePage, startSocket };
