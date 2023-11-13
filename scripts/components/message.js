@@ -71,7 +71,10 @@ async function UpdateContent(element) {
   console.log("renderer: Got message", message);
 
   authorElement.textContent = `@${author.username}#${author.discriminator}`;
-  if (message.content) messageContainer.innerHTML = `<p>${message.content}</p>`;
+  if (message.content)
+    messageContainer.innerHTML = DOMPurify.sanitize(
+      marked.parse(message.content),
+    );
 }
 
 export { Message };
