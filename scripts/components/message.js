@@ -36,7 +36,6 @@ class Message extends HTMLElement {
   }
 
   async connectedCallback() {
-    console.log("hiiiiiiii");
     await UpdateContent(this);
   }
 }
@@ -45,14 +44,10 @@ class Message extends HTMLElement {
 async function UpdateContent(element) {
   const shadowDOM = element.shadowRoot;
 
-  console.log("got shadow root", shadowDOM);
-
   /** @type {HTMLSpanElement} */
   const authorElement = shadowDOM.querySelector("div.author span");
   /** @type {HTMLDivElement} */
   const messageContainer = shadowDOM.querySelector("div.content");
-
-  console.log("elements", authorElement, messageContainer);
 
   const authorToFetch = element.getAttribute("author");
   const messageToFetch = element.getAttribute("message");
@@ -65,10 +60,7 @@ async function UpdateContent(element) {
       headers: [["x-session-token", token]],
     }).then(async (res) => await res.json()));
 
-  console.log("renderer: Got author", author);
-
   const message = messages.get(messageToFetch);
-  console.log("renderer: Got message", message);
 
   authorElement.textContent = `@${author.username}#${author.discriminator}`;
   if (message.content)
