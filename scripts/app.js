@@ -22,6 +22,11 @@ const MessageDisplay = document.querySelector("section#middle");
 /** @type {number} */
 let interval;
 
+/** @type {string} */
+let currentChannelID = "";
+/** @type {string} */
+let currentServerID = "";
+
 function togglePage() {
   app.classList.toggle("hidden");
   loginPage.classList.toggle("hidden");
@@ -102,6 +107,21 @@ async function startSocket() {
         console.log("debug: Loading servers into navigation");
         loadServers();
         break;
+      case "Message":
+        // Ugly ass workarround to cache the message
+        const { type, ...strippedResponse } = response;
+        messages.set(strippedResponse._id, strippedResponse);
+
+        if (strippedResponse.channel !== currentChannelID) break;
+        /** @type {string} */
+        const renderer = document.createElement("message-renderer");
+        renderer.setAttribute("author", strippedResponse.author);
+        renderer.setAttribute("message", strippedResponse._id);
+
+        console.log("debug: appending renderer", renderer);
+
+        MessageDisplay.append(renderer);
+        break;
     }
   });
 
@@ -179,7 +199,7 @@ async function loadMessagesFromChannel(channel) {
     members.set(member._id, member);
   }
 
-  for (const message of response.messages) {
+  for (const message of response.messages.reverse()) {
     messages.set(message._id, message);
 
     // Wouldn't it be better if i use webcomponents for this
@@ -198,10 +218,13 @@ async function loadMessagesFromChannel(channel) {
 serverNav.addEventListener("change", async (ev) => {
   if (ev.currentTarget.value === "DEFAULT") return;
 
+  currentServerID = ev.target.value;
+
   await loadChannels(ev.target.value);
 });
 
 channelNav.addEventListener("change", async (ev) => {
+  currentChannelID = ev.target.value;
   // Something something load messages and display them
   loadMessagesFromChannel(ev.target.value);
 });
