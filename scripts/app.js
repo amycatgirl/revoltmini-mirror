@@ -70,7 +70,7 @@ async function startSocket() {
     console.log("debug: registering interval to about disconnection");
     interval = setInterval(() => {
       socket.send(JSON.stringify({ type: "Ping", data: Date.now() }));
-    });
+    }, 20000);
   });
 
   socket.addEventListener("message", async (ev) => {

@@ -49,5 +49,9 @@ password.addEventListener("change", (ev) => {
   values[1] = ev.currentTarget.value;
 });
 
+function setToken(newValue) {
+  token = newValue;
+}
+
 // We are using token in a lot of places so why not let everyone use it
-export { token };
+export { token, setToken };
