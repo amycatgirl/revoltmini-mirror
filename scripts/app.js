@@ -15,6 +15,10 @@ const loginPage = document.querySelector("main#login");
 const serverNav = document.querySelector("select#server");
 /** @type {HTMLSelectElement} */
 const channelNav = document.querySelector("select#channel");
+/** @type {HTMLTextAreaElement} */
+const messageBox = document.querySelector("form#compose textarea#content");
+/** @type {HTMLTextAreaElement} */
+const messageForm = document.querySelector("form#compose");
 
 /** @type {HTMLElement} */
 const MessageDisplay = document.querySelector("section#middle");
@@ -26,6 +30,8 @@ let interval;
 let currentChannelID = "";
 /** @type {string} */
 let currentServerID = "";
+/** @type {string} */
+let toSend = "";
 
 function togglePage() {
   app.classList.toggle("hidden");
@@ -154,6 +160,13 @@ function loadServers() {
 async function loadChannels(server) {
   channelNav.replaceChildren();
 
+  const defaultOption = document.createElement("option");
+
+  defaultOption.value = "DEFAULT";
+  defaultOption.innerText = "Select a channel";
+
+  channelNav.add(defaultOption);
+
   const info =
     servers.get(server) ||
     (await fetch(`https://api.revolt.chat/servers/${server}`).then(
@@ -203,7 +216,7 @@ async function loadMessagesFromChannel(channel) {
     messages.set(message._id, message);
 
     // Wouldn't it be better if i use webcomponents for this
-    // TL;DR why
+    // not it wasnt
 
     const renderer = document.createElement("message-renderer");
     renderer.setAttribute("author", message.author);
@@ -224,8 +237,28 @@ serverNav.addEventListener("change", async (ev) => {
 });
 
 channelNav.addEventListener("change", async (ev) => {
+  if (ev.currentTarget.value === "DEFAULT") return;
+
   currentChannelID = ev.target.value;
   // Something something load messages and display them
   loadMessagesFromChannel(ev.target.value);
 });
+
+messageForm.addEventListener("submit", async (ev) => {
+  // dont you dare reload the page
+  ev.preventDefault();
+  await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
+    method: "POST",
+    headers: [["x-session-token", token]],
+    body: JSON.stringify({
+      content: toSend,
+    }),
+  }).then(() => {
+    toSend = "";
+    messageBox.value = "";
+  });
+});
+
+messageBox.addEventListener("change", (ev) => (toSend = ev.target.value));
+
 export { togglePage, startSocket };
