@@ -1,17 +1,38 @@
 import { startSocket, togglePage } from "./app.js";
 import { CLIENT_FRIENDLY_NAME, TOKEN_LOCATION } from "./globals.js";
-import { setToken } from "./index.js";
+import { setToken, storage } from "./index.js";
 
 /**
   @typedef {{success: string, _id: string, user_id: string, token: string, name: string, subscription: Object}} SessionResponse
 */
 
 /**
+  @param {string} token
+  @param {"persistent" | "temp"} location
+
+  Save token as base64 encoded value
+*/
+function saveToken(token, location) {
+  const encoded = encodeURIComponent(btoa(token));
+
+  switch (location) {
+    default:
+    case "persistent":
+      storage.setItem("rvlt:token", encoded);
+      break;
+    case "temp":
+      document.cookie = `${TOKEN_LOCATION}=${encoded};path=/;SameSite=Lax`;
+      break;
+  }
+}
+
+/**
   @async
   @param {[string, string]} values
+  @param {boolean} usePersistent
   @returns {Promise<string>}
 */
-async function login(values) {
+async function login(values, usePersistent) {
   try {
     const response = await fetch("https://api.revolt.chat/auth/session/login", {
       method: "POST",
@@ -38,11 +59,8 @@ async function login(values) {
         modal.setAttribute("ticket", parsed.ticket);
         document.body.append(modal);
       } else {
-        /** @type {string} */
-        const encoded = encodeURIComponent(btoa(parsed.token));
-        // store token in cookie
-        document.cookie = `${TOKEN_LOCATION}=${encoded};path=/;SameSite=Lax`;
-
+        saveToken(parsed.token, usePersistent ? "persistent" : "temp");
+        storage.setItem("rvlt:session", parsed._id);
         togglePage();
 
         return parsed.token;
@@ -53,9 +71,17 @@ async function login(values) {
     console.error("debug: failed to log in", e.stack);
   }
 }
+/**
+  @async
+  @param {string} token - MFA Token
+  @param {string} ticket - MFA Ticket
+  @param {boolean} usePersistent
 
-async function handleMFA(token, ticket) {
+  @returns {Promise<void>}
+*/
+async function handleMFA(token, ticket, usePersistent) {
   try {
+    /** @type {SessionResponse} */
     const response = await fetch("https://api.revolt.chat/auth/session/login", {
       method: "POST",
       body: JSON.stringify({
@@ -68,11 +94,9 @@ async function handleMFA(token, ticket) {
     }).then(async (res) => await res.json());
 
     if (response.result !== "MFA") {
-      /** @type {string} */
-      const encoded = encodeURIComponent(btoa(response.token));
-      // store token in cookie
-      document.cookie = `${TOKEN_LOCATION}=${encoded};path=/;SameSite=Lax`;
+      saveToken(response.token, usePersistent ? "persistent" : "temp");
 
+      storage.setItem("rvlt:session", response._id);
       setToken(response.token);
 
       togglePage();

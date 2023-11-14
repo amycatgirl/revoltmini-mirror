@@ -6,7 +6,8 @@ import {
   servers,
   users,
 } from "./cache.js";
-import { token } from "./index.js";
+import { storage, token } from "./index.js";
+import { deleteAllCookies } from "./utils.js";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -32,6 +33,8 @@ let currentChannelID = "";
 let currentServerID = "";
 /** @type {string} */
 let toSend = "";
+/** @type {WebSocket} */
+let socket;
 
 function togglePage() {
   app.classList.toggle("hidden");
@@ -60,7 +63,7 @@ async function GetWSLocation() {
 }
 
 async function startSocket() {
-  const socket = new WebSocket((await GetWSLocation()) + "?format=json");
+  socket = new WebSocket((await GetWSLocation()) + "?format=json");
 
   socket.addEventListener("open", () => {
     console.log("debug: Opened connection with Bonfire");
@@ -136,10 +139,56 @@ async function startSocket() {
       "debug: Something went wrong, we don't know what went wrong but something surely went wrong",
     );
   });
+
+  socket.addEventListener("close", () => {
+    // please
+    stopPinging();
+  });
 }
 
 function stopPinging() {
   clearInterval(interval);
+}
+
+/**
+  @async
+  Destroy the session
+*/
+async function closeConnectionAndLogOut() {
+  socket.close();
+
+  try {
+    await fetch(
+      `https://api.revolt.chat/auth/session/${storage.getItem("rvlt:session")}`,
+      { method: "DELETE", headers: [["x-session-token", token]] },
+    );
+
+    console.log("debug: killed session :)");
+
+    deleteAllCookies();
+    storage.clear();
+
+    togglePage();
+
+    const modal = document.createElement("dialog", { is: "custom-modal" });
+    modal.setAttribute("title", "Logged out!");
+    modal.setAttribute(
+      "description",
+      "You have successfuly logged out of your previous session. Feel free to close the tab :)",
+    );
+
+    document.body.append(modal);
+  } catch (e) {
+    console.error("Could not kill session, oh no", e.stack);
+    const modal = document.createElement("dialog", { is: "custom-modal" });
+    modal.setAttribute("title", "Oops! Could not log out");
+    modal.setAttribute(
+      "description",
+      "Revolt could not destroy your session, either you are already logged out or your session doesn't exist for some reason",
+    );
+
+    document.body.append(modal);
+  }
 }
 
 // Once we have a token and we have logged in, then we can start loading
@@ -261,4 +310,4 @@ messageForm.addEventListener("submit", async (ev) => {
 
 messageBox.addEventListener("change", (ev) => (toSend = ev.target.value));
 
-export { togglePage, startSocket };
+export { togglePage, startSocket, closeConnectionAndLogOut };
