@@ -67,6 +67,16 @@ async function UpdateContent(element) {
     messageContainer.innerHTML = DOMPurify.sanitize(
       marked.parse(message.content),
     );
+
+  if (message.attachments) {
+    const stringified = message.attachments
+      .map((el) => JSON.stringify(el))
+      .join("$");
+    const attachmentDisplay = document.createElement("attachment-renderer");
+    attachmentDisplay.setAttribute("elements", stringified);
+
+    shadowDOM.append(attachmentDisplay);
+  }
 }
 
 export { Message };
