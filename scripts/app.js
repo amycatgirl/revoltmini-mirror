@@ -248,24 +248,33 @@ async function loadChannels(server) {
 
   const info =
     servers.get(server) ||
-    (await fetch(`https://api.revolt.chat/servers/${server}`).then(
-      async (res) => await res.json(),
-    ));
+    (await fetch(
+      `https://api.revolt.chat/servers/${server}?include_channels=true`,
+    ).then(async (res) => await res.json()));
 
   if (!info) throw "No information, somehow";
 
-  for (const id of info.channels) {
-    // TODO: Add fallback
-    const channel = channels.get(id);
+  console.log(info.channels);
 
-    if (channel.channel_type !== "TextChannel") return;
+  for await (const id of info.channels) {
+    try {
+      const channel =
+        channels.get(id) ||
+        (await fetch(`https://api.revolt.chat/channels/${id}`, {
+          headers: [["x-session-token", token]],
+        })
+          .then(async (res) => await res.json())
+          .then((res) => {
+            channels.set(res._id, res);
+          }));
 
-    const option = document.createElement("option");
+      const option = document.createElement("option");
 
-    option.value = id;
-    option.innerText = `#${channel.name}`;
+      option.value = id;
+      option.innerText = `#${channel.name || "unknown"}`;
 
-    channelNav.append(option);
+      channelNav.append(option);
+    } catch {}
   }
 }
 
