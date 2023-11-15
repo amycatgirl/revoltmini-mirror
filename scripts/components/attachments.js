@@ -20,7 +20,7 @@ class Attachments extends HTMLElement {
       }
       img, video {
         border-radius: 5px;
-        max-width: 25rem;
+        max-width: calc(100vw - 3%);
         max-height: 20rem;
       }
     `;

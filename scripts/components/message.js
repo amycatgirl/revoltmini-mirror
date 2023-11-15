@@ -23,16 +23,12 @@ class Message extends HTMLElement {
     contentsBox.innerText = "loading";
 
     const style = document.createElement("style");
-    const prism = document.createElement("link");
-
-    prism.href =
-      "https://unpkg.com/prismjs@1.29.0/themes/prism-okaidia.min.css";
-    prism.rel = "stylesheet";
 
     style.innerText = `
       div.author, div.content {
-        margin: 0 4px;
+        margin: 0;
       }
+        
       attachment-renderer {
         margin: 0 4px;
       }
@@ -47,7 +43,11 @@ class Message extends HTMLElement {
         color: var(--accent);
       }
       pre, code {
-        background: #000;
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -pre-wrap;
+        white-space: -o-pre-wrap;
+        word-wrap: break-word;
         font-family: var(--font-mono);
       }
 
@@ -59,7 +59,6 @@ class Message extends HTMLElement {
     shadow.appendChild(authorContainer);
     shadow.appendChild(contentsBox);
     shadow.appendChild(style);
-    shadow.appendChild(prism);
   }
 
   async connectedCallback() {
@@ -67,34 +66,9 @@ class Message extends HTMLElement {
   }
 }
 
-// Prism highlighting
-const { markedHighlight } = globalThis.markedHighlight;
 const { Marked } = globalThis.marked;
 
-Prism.plugins.autoloader.languages_path =
-  "https://cdn.jsdelivr.net/npm/prismjs/components/";
-Prism.plugins.autoloader.loadLanguages([
-  "js",
-  "ts",
-  "jsx",
-  "tsx",
-  "cobol",
-  "applescript",
-  "java",
-  "kotlin",
-  "csharp",
-  "c",
-  "cpp",
-  "json",
-]);
-const markdownParser = new Marked(
-  markedHighlight({
-    lang_prefix: "language-",
-    highlight(code, lang) {
-      return Prism.highlight(code, Prism.languages[lang], lang);
-    },
-  }),
-);
+const markdownParser = new Marked();
 
 /** @param {HTMLElement} element */
 async function UpdateContent(element) {
