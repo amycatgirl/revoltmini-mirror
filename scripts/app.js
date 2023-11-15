@@ -129,8 +129,6 @@ async function startSocket() {
         renderer.setAttribute("author", strippedResponse.author);
         renderer.setAttribute("message", strippedResponse._id);
 
-        console.log("debug: appending renderer", renderer);
-
         MessageDisplay.append(renderer);
         break;
     }

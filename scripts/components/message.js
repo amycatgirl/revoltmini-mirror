@@ -37,6 +37,7 @@ class Message extends HTMLElement {
         color: var(--accent);
       }
       pre, code {
+        background: #000;
         font-family: var(--font-mono);
       }
     `;
