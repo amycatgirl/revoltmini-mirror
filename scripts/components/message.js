@@ -23,22 +23,63 @@ class Message extends HTMLElement {
     contentsBox.innerText = "loading";
 
     const style = document.createElement("style");
+    const prism = document.createElement("link");
+
+    prism.href =
+      "https://unpkg.com/prismjs@1.29.0/themes/prism-okaidia.min.css";
+    prism.rel = "stylesheet";
 
     style.innerText = `
       p {
        font-size: initial;
+      }
+      a {
+        color: var(--accent);
+      }
+      pre, code {
+        font-family: var(--font-mono);
       }
     `;
 
     shadow.appendChild(authorContainer);
     shadow.appendChild(contentsBox);
     shadow.appendChild(style);
+    shadow.appendChild(prism);
   }
 
   async connectedCallback() {
     await UpdateContent(this);
   }
 }
+
+// Prism highlighting
+const { markedHighlight } = globalThis.markedHighlight;
+const { Marked } = globalThis.marked;
+
+Prism.plugins.autoloader.languages_path =
+  "https://cdn.jsdelivr.net/npm/prismjs/components/";
+Prism.plugins.autoloader.loadLanguages([
+  "js",
+  "ts",
+  "jsx",
+  "tsx",
+  "cobol",
+  "applescript",
+  "java",
+  "kotlin",
+  "csharp",
+  "c",
+  "cpp",
+  "json",
+]);
+const markdownParser = new Marked(
+  markedHighlight({
+    lang_prefix: "language-",
+    highlight(code, lang) {
+      return Prism.highlight(code, Prism.languages[lang], lang);
+    },
+  }),
+);
 
 /** @param {HTMLElement} element */
 async function UpdateContent(element) {
@@ -65,7 +106,7 @@ async function UpdateContent(element) {
   authorElement.textContent = `@${author.username}#${author.discriminator}`;
   if (message.content)
     messageContainer.innerHTML = DOMPurify.sanitize(
-      marked.parse(message.content),
+      markdownParser.parse(message.content),
     );
 
   if (message.attachments) {

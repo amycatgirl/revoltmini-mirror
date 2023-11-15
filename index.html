@@ -4,13 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RevoltMini | #general in server</title>
-    <!-- Needed for basic functionality, sorry noscript users -->
+    
+    <!-- Needed for basic functionality, sorry noscript/librejs users -->
     <script defer type="module" src="scripts/index.js"></script>
     <script defer type="module" src="scripts/components/index.js"></script>
+    
     <!-- Needed for markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-core.min.js"></script>
+	  <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
     <!-- TODO: Add LibMFM whenever that comes out -->
+        
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <main id="login">
@@ -89,10 +98,11 @@
       <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
         <form id="compose" class="grid">
           <input type="file" accept="*" id="attach"></input>
+          <label for="attach">+</label>
           <textarea
             type="text"
             id="content"
-            placeholder="Send a message in #General"
+            placeholder="Send message"
           ></textarea>
           <button id="send">Send</button>
         </form>
@@ -101,11 +111,45 @@
   </body>
 
   <style>
+    @import url("public/fonts/inter/inter.css");
+    @import url("public/fonts/jbmono/jetbrains-mono.css");
+    
+    :root {
+      --bg: #191919;
+      --fg: #F6F6F6;
+      --accent: #FD6671;
+      --primary-bg: #242424;
+      --header-bg: #363636;
+      --secondary-bg: #1E1E1E;
+      --secondary-fg: #C8C8C8;
+      --font-sans: "Inter", system-ui;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #F6F6F6;
+        --fg: #000;
+        --accent: #FD6671;
+        --primary-bg: #fff;
+        --header-bg: #f1f1f1;
+        --secondary-bg: #f1f1f1;
+        --secondary-fg: #1f1f1f;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       width: 100%;
       height: 100vh;
       margin: 0 0;
       padding: 0 0;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
     }
 
     #app {
@@ -155,29 +199,23 @@
 
     header#top {
       grid-area: 1 / 1 / 2 / 2;
+      background-color: var(--header-bg);
     }
 
     section#middle {
       grid-area: 2 / 1 / 3 / 2;
+      display: flex;
+      flex-flow: column nowrap;
     }
 
     section#messagebox {
       grid-area: 3 / 1 / 4 / 2;
-    }
-
-    header#top,
-    section#messagebox {
-      flex-wrap: nowrap;
+      background-color: var(--primary-bg);
     }
 
     section#middle {
       overflow-y: auto;
       overflow-wrap: break-word;
-    }
-
-    section#info {
-      margin-left: auto;
-      margin-right: 1rem;
     }
 
     section#info h1 {
@@ -188,24 +226,38 @@
       box-sizing: border-box;
     }
 
-    #compose.grid {
-      display: grid;
-      width: 100%;
-      height: 100%;
-      grid-template-rows: 1fr 1fr 1fr;
-    }
-
-    #compose.grid #attach {
-      grid-column: 1;
-    }
-
     #compose.grid #content {
-      grid-column: 2;
+      background-color: var(--secondary-bg);
+      color: var(--secondary-fg);
+      width: 100%;
+      resize: none;
     }
 
     #compose.grid #send {
-      grid-column: 3;
+      height: 100%;
+      width: 25%;
     }
 
+    #compose.grid {
+      display: inline-flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    #compose.grid #attach {
+      display: none;
+    }
+
+    #compose.grid label[for="attach"],
+    #compose.grid button#send {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 25%;
+      height: 100%;
+      background-color: var(--header-bg);
+      color: var(--fg);
+      border: none;
+    }
   </style>
 </html>

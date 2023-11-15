@@ -18,6 +18,8 @@ const serverNav = document.querySelector("select#server");
 const channelNav = document.querySelector("select#channel");
 /** @type {HTMLTextAreaElement} */
 const messageBox = document.querySelector("form#compose textarea#content");
+/** @type {HTMLInputElement} */
+const attachInput = document.querySelector("form#compose input#attach");
 /** @type {HTMLTextAreaElement} */
 const messageForm = document.querySelector("form#compose");
 

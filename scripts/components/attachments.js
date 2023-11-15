@@ -16,7 +16,6 @@ class Attachments extends HTMLElement {
       #imagecontainer {
         display: flex;
         flex-flow: wrap column;
-        width: 100vw;
       }
       img, video {
         max-width: 50%;

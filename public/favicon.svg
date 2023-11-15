@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="260.10364"
+   height="199.87201"
+   viewBox="0 0 260.10364 199.87201"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <style
+     id="style1"></style>
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-1202.9769,-180.27466)">
+    <g
+       id="g2-6"
+       transform="translate(1097.9285,24.21066)">
+      <path
+         style="font-weight:800;font-size:288px;font-family:Cantarell;-inkscape-font-specification:'Cantarell Ultra-Bold';stroke-width:3.883;stroke-opacity:0.597333"
+         d="m 146.848,355.936 h 48.384 V 224.032 l -6.048,7.776 47.52,93.312 h 37.728 l 45.504,-93.312 -3.168,-6.336 v 130.464 h 48.384 V 156.064 h -47.52 L 248.224,292 h 20.448 L 194.944,156.064 h -48.096 z"
+         id="text1-4-2"
+         aria-label="M" />
+      <path
+         style="fill-opacity:1;stroke-width:0;stroke-dasharray:none;stroke-opacity:0.597333"
+         d="M 146.848,156.064 H 105.04828 L 146.848,182.73103 Z"
+         id="path1-8-9" />
+    </g>
+  </g>
+  <style type="text/css">
+      @media (prefers-color-scheme: light) {
+         path {
+            fill: #67001c;
+         }
+      }
+      @media (prefers-color-scheme: dark) {
+         path {
+            fill: #ffffff;
+         }
+      }
+  </style>
+</svg>
