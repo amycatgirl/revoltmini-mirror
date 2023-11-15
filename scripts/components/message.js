@@ -30,6 +30,16 @@ class Message extends HTMLElement {
     prism.rel = "stylesheet";
 
     style.innerText = `
+      div.author, div.content {
+        margin: 0 4px;
+      }
+      attachment-renderer {
+        margin: 0 4px;
+      }
+        
+      div.author span {
+       font-weight: 600;
+      }
       p {
        font-size: initial;
       }
@@ -39,6 +49,10 @@ class Message extends HTMLElement {
       pre, code {
         background: #000;
         font-family: var(--font-mono);
+      }
+
+      p.blocked {
+        color: red !important;
       }
     `;
 
@@ -104,20 +118,33 @@ async function UpdateContent(element) {
 
   const message = messages.get(messageToFetch);
 
-  authorElement.textContent = `@${author.username}#${author.discriminator}`;
-  if (message.content)
-    messageContainer.innerHTML = DOMPurify.sanitize(
-      markdownParser.parse(message.content),
-    );
+  console.log("debug: author", author);
 
-  if (message.attachments) {
-    const stringified = message.attachments
-      .map((el) => JSON.stringify(el))
-      .join("$");
-    const attachmentDisplay = document.createElement("attachment-renderer");
-    attachmentDisplay.setAttribute("elements", stringified);
+  console.log("debug: relationship with", author.username, author.relationship);
 
-    shadowDOM.append(attachmentDisplay);
+  switch (author.relationship) {
+    case "Blocked":
+    case "BlockedOther":
+      authorElement.remove();
+      messageContainer.innerHTML = `<p class="blocked">Blocked Message</p>`;
+      console.log("blocked :)");
+      break;
+    default:
+      authorElement.textContent = `@${author.username}#${author.discriminator}`;
+      if (message.content)
+        messageContainer.innerHTML = DOMPurify.sanitize(
+          markdownParser.parse(message.content),
+        );
+
+      if (message.attachments) {
+        const stringified = message.attachments
+          .map((el) => JSON.stringify(el))
+          .join("$");
+        const attachmentDisplay = document.createElement("attachment-renderer");
+        attachmentDisplay.setAttribute("elements", stringified);
+
+        shadowDOM.append(attachmentDisplay);
+      }
   }
 }
 

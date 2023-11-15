@@ -37,6 +37,10 @@ let currentServerID = "";
 let toSend = "";
 /** @type {WebSocket} */
 let socket;
+/** @type {FileList | File[]} */
+let toBeUploaded;
+/** @type {string[]} */
+let attachments;
 
 function togglePage() {
   app.classList.toggle("hidden");
@@ -191,6 +195,32 @@ async function closeConnectionAndLogOut() {
   }
 }
 
+/**
+  @async
+  @param {FileList | Image[]} images
+  @returns {Promise<string[]>}
+*/
+async function uploadAllImages(images) {
+  let ids = [];
+  try {
+    for await (const image of images) {
+      const form = new FormData();
+      form.append("file", image, image.name);
+      await fetch("https://autumn.revolt.chat/attachments", {
+        method: "POST",
+        body: form,
+      })
+        .then(async (res) => await res.json())
+        .then((json) => ids.push(json.id));
+    }
+
+    if (ids) return ids;
+    throw "oops :3";
+  } catch (e) {
+    console.error(e.message, e.stack);
+  }
+}
+
 // Once we have a token and we have logged in, then we can start loading
 // Channels, servers, etc...
 
@@ -254,7 +284,10 @@ async function loadMessagesFromChannel(channel) {
   // { messages: Message[], users: User[], members: Member[] }
 
   for (const user of response.users) {
-    users.set(user._id, user);
+    const before = users.get(user);
+    const obj = before ? Object.assign(user, before) : user;
+    console.log("debug: cache", obj);
+    users.set(user._id, obj);
   }
 
   for (const member of response.members) {
@@ -270,8 +303,6 @@ async function loadMessagesFromChannel(channel) {
     const renderer = document.createElement("message-renderer");
     renderer.setAttribute("author", message.author);
     renderer.setAttribute("message", message._id);
-
-    console.log("debug: appending renderer", renderer);
 
     MessageDisplay.append(renderer);
   }
@@ -293,18 +324,35 @@ channelNav.addEventListener("change", async (ev) => {
   loadMessagesFromChannel(ev.target.value);
 });
 
+attachInput.addEventListener("change", async (ev) => {
+  const files = ev.target.files;
+  toBeUploaded = files;
+});
+
 messageForm.addEventListener("submit", async (ev) => {
   // dont you dare reload the page
   ev.preventDefault();
+
+  if (toBeUploaded.length > 0) {
+    attachments = await uploadAllImages(toBeUploaded);
+  }
+
+  const body =
+    attachments.length > 0
+      ? { content: toSend, attachments }
+      : {
+          content: toSend,
+        };
+
   await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
     method: "POST",
     headers: [["x-session-token", token]],
-    body: JSON.stringify({
-      content: toSend,
-    }),
+    body: JSON.stringify(body),
   }).then(() => {
     toSend = "";
     messageBox.value = "";
+    attachments = [];
+    toBeUploaded = [];
   });
 });
 

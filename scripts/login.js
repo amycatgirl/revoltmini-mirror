@@ -32,7 +32,7 @@ function saveToken(token, location) {
   @param {boolean} usePersistent
   @returns {Promise<string>}
 */
-async function login(values, usePersistent) {
+async function login(values, usePersistent = true) {
   try {
     const response = await fetch("https://api.revolt.chat/auth/session/login", {
       method: "POST",
@@ -79,7 +79,7 @@ async function login(values, usePersistent) {
 
   @returns {Promise<void>}
 */
-async function handleMFA(token, ticket, usePersistent) {
+async function handleMFA(token, ticket, usePersistent = true) {
   try {
     /** @type {SessionResponse} */
     const response = await fetch("https://api.revolt.chat/auth/session/login", {

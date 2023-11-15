@@ -14,12 +14,14 @@ class Attachments extends HTMLElement {
 
     style.innerText = `
       #imagecontainer {
+        margin: 0 4px;
         display: flex;
         flex-flow: wrap column;
       }
       img, video {
-        max-width: 50%;
-        height: auto;
+        border-radius: 5px;
+        max-width: 25rem;
+        max-height: 20rem;
       }
     `;
 
