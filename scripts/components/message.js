@@ -10,6 +10,9 @@ class Message extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: "open" });
 
+    const replyContainer = document.createElement("div");
+    replyContainer.id = "replies";
+
     const authorContainer = document.createElement("div");
     const authorText = document.createElement("span");
 
@@ -56,6 +59,7 @@ class Message extends HTMLElement {
       }
     `;
 
+    shadow.appendChild(replyContainer);
     shadow.appendChild(authorContainer);
     shadow.appendChild(contentsBox);
     shadow.appendChild(style);
@@ -80,6 +84,8 @@ async function UpdateContent(element) {
   const authorElement = shadowDOM.querySelector("div.author span");
   /** @type {HTMLDivElement} */
   const messageContainer = shadowDOM.querySelector("div.content");
+  /** @type {HTMLDivElement} */
+  const replyContainer = shadowDOM.querySelector("div#replies");
 
   const authorToFetch = element.getAttribute("author");
   const messageToFetch = element.getAttribute("message");
@@ -94,6 +100,26 @@ async function UpdateContent(element) {
 
   const message = messages.get(messageToFetch);
 
+  if (message.replies) {
+    for (const id of message.replies) {
+      const replytxt = document.createElement("p");
+      const reply = messages.get(id);
+      if (!reply) {
+        replytxt.innerText = "↱ unknown message";
+        replytxt.class = "unknown";
+      } else {
+        const replyAuthor = users.get(reply.author);
+        replytxt.innerText = `↱ ${replyAuthor?.username ?? "unknown"}: ${
+          reply.content && reply.attachments > 0
+            ? `${reply.attachments.length} attachments`
+            : reply.content ?? "no content"
+        }`;
+      }
+
+      replyContainer.appendChild(replytxt);
+    }
+  }
+
   console.log("debug: author", author);
 
   console.log("debug: relationship with", author.username, author.relationship);
@@ -107,10 +133,13 @@ async function UpdateContent(element) {
       break;
     default:
       authorElement.textContent = `@${author.username}#${author.discriminator}`;
-      if (message.content)
+      if (message.content) {
         messageContainer.innerHTML = DOMPurify.sanitize(
           markdownParser.parse(message.content),
         );
+      } else {
+        messageContainer.replaceChildren();
+      }
 
       if (message.attachments) {
         const stringified = message.attachments
