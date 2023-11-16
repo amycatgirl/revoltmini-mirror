@@ -68,7 +68,9 @@ class Message extends HTMLElement {
 
 const { Marked } = globalThis.marked;
 
-const markdownParser = new Marked();
+const markdownParser = new Marked({
+  breaks: true,
+});
 
 /** @param {HTMLElement} element */
 async function UpdateContent(element) {

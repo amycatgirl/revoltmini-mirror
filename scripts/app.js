@@ -22,6 +22,8 @@ const messageBox = document.querySelector("form#compose textarea#content");
 const attachInput = document.querySelector("form#compose input#attach");
 /** @type {HTMLTextAreaElement} */
 const messageForm = document.querySelector("form#compose");
+/** @type {HTMLButtonElement} */
+const sendBTN = document.querySelector("form#compose button");
 
 /** @type {HTMLElement} */
 const MessageDisplay = document.querySelector("section#middle");
@@ -339,15 +341,16 @@ attachInput.addEventListener("change", async (ev) => {
 });
 
 messageForm.addEventListener("submit", async (ev) => {
+  toSend = messageBox.value;
   // dont you dare reload the page
   ev.preventDefault();
 
-  if (toBeUploaded.length > 0) {
+  if (toBeUploaded && toBeUploaded.length > 0) {
     attachments = await uploadAllImages(toBeUploaded);
   }
 
   const body =
-    attachments.length > 0
+    attachments && attachments.length > 0
       ? { content: toSend, attachments }
       : {
           content: toSend,
@@ -365,6 +368,12 @@ messageForm.addEventListener("submit", async (ev) => {
   });
 });
 
-messageBox.addEventListener("change", (ev) => (toSend = ev.target.value));
+messageBox.addEventListener("keydown", (ev) => {
+  if (ev.code === "Enter" && !ev.shiftKey) {
+    ev.preventDefault();
+    sendBTN.click();
+  }
 
+  toSend = ev.target.value;
+});
 export { togglePage, startSocket, closeConnectionAndLogOut };
