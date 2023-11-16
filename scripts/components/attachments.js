@@ -20,8 +20,8 @@ class Attachments extends HTMLElement {
       }
       img, video {
         border-radius: 5px;
-        max-width: calc(100vw - 3%);
-        max-height: 20rem;
+        max-width: 75%;
+        max-height: 50%;
       }
     `;
 
@@ -47,6 +47,8 @@ class Attachments extends HTMLElement {
           attachment._id +
           "/" +
           attachment.filename;
+        imageAttachment.width = attachment.metadata.width;
+        imageAttachment.height = attachment.metadata.height;
 
         container.append(imageAttachment);
       } else if (attachment.content_type.includes("video")) {
