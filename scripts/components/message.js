@@ -1,7 +1,11 @@
 import { messages, users } from "../cache.js";
 import { token } from "../index.js";
+import { replies, setReplies } from "../app.js";
 
 class Message extends HTMLElement {
+  /** @type {number} */
+  holdTimer;
+
   static get observedAttributes() {
     return ["author", "message"];
   }
@@ -79,16 +83,55 @@ const markdownParser = new Marked({
 /** @param {HTMLElement} element */
 async function UpdateContent(element) {
   const shadowDOM = element.shadowRoot;
-
   /** @type {HTMLSpanElement} */
   const authorElement = shadowDOM.querySelector("div.author span");
   /** @type {HTMLDivElement} */
   const messageContainer = shadowDOM.querySelector("div.content");
   /** @type {HTMLDivElement} */
   const replyContainer = shadowDOM.querySelector("div#replies");
+  /** @type {string} */
+  const messageID = element.getAttribute("message");
+
+  element.addEventListener(
+    "touchstart",
+    (ev) => {
+      element.holdTimer = setTimeout(() => {
+        console.log("reply!", replies);
+        if (replies.length >= 5) {
+          console.log("debug: owo i am owerflowowing ");
+        } else if (
+          Array.from(replies.values()).find((el) => el.id === messageID)
+        ) {
+          console.log("debug: removing");
+          element.style.border = "";
+          // find element
+          setReplies(replies.filter((el) => el.id !== messageID));
+          console.log(replies);
+        } else {
+          console.log("debug: adding");
+          element.style.border = "1px solid var(--accent)";
+          replies.push({ id: messageID, mention: false });
+        }
+      }, 1500);
+      console.log("debug: start");
+    },
+    { passive: true },
+  );
+
+  element.addEventListener("touchmove", () => {
+    clearTimeout(element.holdTimer);
+    console.log("debug: moved");
+  });
+
+  element.addEventListener("touchend", () => {
+    clearTimeout(element.holdTimer);
+    console.log("debug: end");
+  });
+
+  element.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
   const authorToFetch = element.getAttribute("author");
-  const messageToFetch = element.getAttribute("message");
+  const messageToFetch = messageID;
 
   // fetch author from either cache or by fetching them
 
@@ -100,7 +143,7 @@ async function UpdateContent(element) {
 
   const message = messages.get(messageToFetch);
 
-  if (message.replies) {
+  if (message.replies?.reverse()) {
     for (const id of message.replies) {
       const replytxt = document.createElement("p");
       const reply = messages.get(id);

@@ -33,8 +33,8 @@ let interval;
 
 /** @type {string} */
 let currentChannelID = "";
-/** @type {string} */
-let currentServerID = "";
+/** @type {string[]} */
+let replies = [];
 /** @type {string} */
 let toSend = "";
 /** @type {WebSocket} */
@@ -322,8 +322,6 @@ async function loadMessagesFromChannel(channel) {
 serverNav.addEventListener("change", async (ev) => {
   if (ev.currentTarget.value === "DEFAULT") return;
 
-  currentServerID = ev.target.value;
-
   await loadChannels(ev.target.value);
 });
 
@@ -351,9 +349,10 @@ messageForm.addEventListener("submit", async (ev) => {
 
   const body =
     attachments && attachments.length > 0
-      ? { content: toSend, attachments }
+      ? { content: toSend, attachments, replies }
       : {
           content: toSend,
+          replies,
         };
 
   await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
@@ -365,6 +364,13 @@ messageForm.addEventListener("submit", async (ev) => {
     messageBox.value = "";
     attachments = [];
     toBeUploaded = [];
+    replies = [];
+    const selected = document.querySelectorAll(
+      "message-renderer[style^='border']",
+    );
+    for (const element of selected) {
+      element.style.border = "";
+    }
   });
 });
 
@@ -376,4 +382,15 @@ messageBox.addEventListener("keydown", (ev) => {
 
   toSend = ev.target.value;
 });
-export { togglePage, startSocket, closeConnectionAndLogOut };
+
+function setReplies(v) {
+  replies = v;
+}
+
+export {
+  togglePage,
+  startSocket,
+  closeConnectionAndLogOut,
+  replies,
+  setReplies,
+};
