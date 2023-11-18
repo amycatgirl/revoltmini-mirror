@@ -7,7 +7,7 @@ import {
   users,
 } from "./cache.js";
 import { storage, token } from "./index.js";
-import { deleteAllCookies } from "./utils.js";
+import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -27,6 +27,9 @@ const sendBTN = document.querySelector("form#compose button");
 
 /** @type {HTMLElement} */
 const MessageDisplay = document.querySelector("section#middle");
+
+// Register Service Worker
+navigator.serviceWorker.register("sw.js");
 
 /** @type {number} */
 let interval;
@@ -70,6 +73,21 @@ async function GetWSLocation() {
   }
 }
 
+async function GetVapid() {
+  try {
+    const response = await fetch("https://api.revolt.chat").then(
+      async (res) => await res.json(),
+    );
+
+    if (!response) throw "Could not parse response from API";
+
+    return response.vapid;
+  } catch (e) {
+    console.error("debug: Error trying to get VAPID", e.stack);
+    throw e;
+  }
+}
+
 async function startSocket() {
   socket = new WebSocket((await GetWSLocation()) + "?format=json");
 
@@ -94,6 +112,7 @@ async function startSocket() {
       case "Ready":
         console.log("debug: Got ready event from API");
         console.log(`debug: Hi!`);
+
         // Add everything into cache :)
 
         for (const server of response.servers) {
@@ -154,6 +173,38 @@ async function startSocket() {
 
 function stopPinging() {
   clearInterval(interval);
+}
+
+/**
+  Request Push Notification
+*/
+function requestPush() {
+  Notification.requestPermission().then(async (v) => {
+    if (v === "granted") {
+      // subscribe to webPush
+      const reg = await navigator.serviceWorker?.getRegistration();
+
+      if (!reg) return;
+
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(await GetVapid()),
+      });
+
+      const json = sub.toJSON();
+
+      if (json.keys) {
+        await fetch("https://api.revolt.chat/push/subscribe", {
+          method: "POST",
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+            ...json.keys,
+          }),
+          headers: [["x-session-token", token]],
+        });
+      }
+    }
+  });
 }
 
 /**
@@ -393,4 +444,5 @@ export {
   closeConnectionAndLogOut,
   replies,
   setReplies,
+  requestPush,
 };

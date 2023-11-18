@@ -1,4 +1,9 @@
-import { closeConnectionAndLogOut, startSocket, togglePage } from "./app.js";
+import {
+  closeConnectionAndLogOut,
+  requestPush,
+  startSocket,
+  togglePage,
+} from "./app.js";
 import { TOKEN_LOCATION } from "./globals.js";
 import { login } from "./login.js";
 import { getCookie } from "./utils.js";
@@ -71,6 +76,7 @@ function setToken(newValue) {
 }
 
 window.logout = closeConnectionAndLogOut;
+window.requestPush = requestPush;
 
 // We are using token in a lot of places so why not let everyone use it
 export { token, setToken, storage };

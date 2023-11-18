@@ -24,4 +24,17 @@ function deleteAllCookies() {
     document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
   }
 }
-export { getCookie, deleteAllCookies };
+
+/**
+  Convert urlBase64 string into a Uint8Array
+  @param {string} base64String - urlBase64 string
+*/
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+export { getCookie, deleteAllCookies, urlBase64ToUint8Array };
