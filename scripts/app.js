@@ -294,6 +294,43 @@ function loadServers() {
   }
 }
 
+/**
+  @param {string} server - ID of the server to fetch
+  @returns {void}
+*/
+async function cacheMembersFromServer(server) {
+  try {
+    const response = await fetch(
+      `https://api.revolt.chat/servers/${server}/members`,
+      {
+        headers: [["x-session-token", token]]
+      }
+    )
+    .then(async res => await res.json());
+    
+    if (response.members && response.users) {
+      for (const member of response.members) {
+        const memberFromCache = members.get(member._id.user);
+        if (!memberFromCache) {
+          members.set(member._id.user, [member]);
+          continue;
+        }
+        
+        // Don't add the same member to the cache, thats dumb
+        if (memberFromCache.find(m => m._id.user === member._id.user)) continue;
+        
+        members.set(member._id.user, [...memberFromCache, member]);
+        
+        console.log("debug: cache values", members.values());
+      }
+      
+      console.log("debug: done caching members", members);
+    }
+  } catch (e) {
+    console.error("Failed to cache members", e.stack);
+  }
+}
+
 async function loadChannels(server) {
   channelNav.replaceChildren();
 
@@ -358,11 +395,6 @@ async function loadMessagesFromChannel(channel) {
     users.set(user._id, obj);
   }
 
-  for (const member of response.members) {
-    // TODO: improve cache for members, make a hashmap inside of another hashmap maybe
-    members.set(member._id, member);
-  }
-
   for (const message of response.messages.reverse()) {
     messages.set(message._id, message);
 
@@ -379,7 +411,10 @@ async function loadMessagesFromChannel(channel) {
 
 serverNav.addEventListener("change", async (ev) => {
   if (ev.currentTarget.value === "DEFAULT") return;
-
+  
+  console.log("owo whats this:", this);
+  
+  await cacheMembersFromServer(ev.target.value);
   await loadChannels(ev.target.value);
 });
 
