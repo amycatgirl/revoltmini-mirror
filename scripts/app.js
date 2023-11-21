@@ -28,8 +28,8 @@ const sendBTN = document.querySelector("form#compose button");
 /** @type {HTMLElement} */
 const MessageDisplay = document.querySelector("section#middle");
 
-// Register Service Worker
-navigator.serviceWorker.register("sw.js");
+// Register Service Worker if browser supports it
+navigator.serviceWorker?.register("sw.js");
 
 /** @type {number} */
 let interval;
@@ -72,7 +72,7 @@ async function GetWSLocation() {
     throw e;
   }
 }
-
+// TODO: Refactor both functions into one
 async function GetVapid() {
   try {
     const response = await fetch("https://api.revolt.chat").then(
@@ -179,30 +179,35 @@ function stopPinging() {
   Request Push Notification
 */
 function requestPush() {
-  Notification.requestPermission().then(async (v) => {
-    if (v === "granted") {
-      // subscribe to webPush
-      const reg = await navigator.serviceWorker?.getRegistration();
+  Notification.requestPermission().then(async (state) => {
+     switch(state) {
+       case "granted":
+        const reg = await navigator.serviceWorker?.getRegistration();
+        
+        // This means that the browser probably doesn't support serviceWorkers.
+        if (!reg) return;
 
-      if (!reg) return;
-
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(await GetVapid()),
-      });
-
-      const json = sub.toJSON();
-
-      if (json.keys) {
-        await fetch("https://api.revolt.chat/push/subscribe", {
-          method: "POST",
-          body: JSON.stringify({
-            endpoint: sub.endpoint,
-            ...json.keys,
-          }),
-          headers: [["x-session-token", token]],
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(await GetVapid()),
         });
-      }
+
+        const json = sub.toJSON();
+
+        if (json.keys) {
+          await fetch("https://api.revolt.chat/push/subscribe", {
+            method: "POST",
+            body: JSON.stringify({
+              endpoint: sub.endpoint,
+              ...json.keys,
+            }),
+            headers: [["x-session-token", token]],
+          });
+        }
+        
+        break;
+      default:
+        break;
     }
   });
 }
@@ -346,6 +351,7 @@ async function loadMessagesFromChannel(channel) {
   // { messages: Message[], users: User[], members: Member[] }
 
   for (const user of response.users) {
+    // TODO: Cache users another way
     const before = users.get(user);
     const obj = before ? Object.assign(user, before) : user;
     console.log("debug: cache", obj);
@@ -353,6 +359,7 @@ async function loadMessagesFromChannel(channel) {
   }
 
   for (const member of response.members) {
+    // TODO: improve cache for members, make a hashmap inside of another hashmap maybe
     members.set(member._id, member);
   }
 
