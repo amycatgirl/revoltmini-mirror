@@ -1,3 +1,5 @@
+import { messages, members, channels, roles } from "./cache.js";
+
 /**
   Get a cookie from this document's cookies
   @link https://www.w3schools.com/js/js_cookies.asp
@@ -37,4 +39,30 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
-export { getCookie, deleteAllCookies, urlBase64ToUint8Array };
+/**
+  Get role colour from message
+  @param {string} message
+  @returns {string}
+*/
+function getRoleColour(message) {
+  const found = messages.get(message);
+  const author = found.author;
+  const channel = channels.get(found.channel);
+
+  const membersInServer = members.get(channel.server);
+  const member = membersInServer.find(m => m._id.user === author);
+  
+  if (!member.roles) return "var(--fg)";
+  
+  const firstRole = member.roles[0];
+  console.log(firstRole);
+
+  const rolesInServer = roles.get(channel.server);
+  const role = rolesInServer.find(r => r.id === firstRole);
+
+  if (!role) return "var(--fg)";
+
+  return role.colour;
+}
+
+export { getCookie, deleteAllCookies, urlBase64ToUint8Array, getRoleColour };

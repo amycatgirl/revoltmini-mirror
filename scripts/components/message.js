@@ -1,6 +1,7 @@
 import { messages, users } from "../cache.js";
 import { token } from "../index.js";
 import { replies, setReplies } from "../app.js";
+import { getRoleColour } from "../utils.js";
 
 class Message extends HTMLElement {
   /** @type {number} */
@@ -143,8 +144,24 @@ async function UpdateContent(element) {
 
   const message = messages.get(messageToFetch);
 
-  if (message.replies?.reverse()) {
-    for (const id of message.replies) {
+  const roleColour = getRoleColour(messageToFetch);
+
+  if (roleColour) {
+    const style = shadowDOM.querySelector("style");
+
+    style.innerText = style.innerText + `
+        \n
+        div.author span {
+          background: ${roleColour};
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+        }
+      `
+  }
+
+  if (message.replies) {
+    for (const id of message.replies.reverse()) {
       const replytxt = document.createElement("p");
       const reply = messages.get(id);
       if (!reply) {

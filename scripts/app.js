@@ -5,6 +5,7 @@ import {
   messages,
   servers,
   users,
+  roles
 } from "./cache.js";
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
@@ -309,26 +310,62 @@ async function cacheMembersFromServer(server) {
     .then(async res => await res.json());
     
     if (response.members && response.users) {
-      for (const member of response.members) {
-        const memberFromCache = members.get(member._id.user);
-        if (!memberFromCache) {
-          members.set(member._id.user, [member]);
-          continue;
-        }
-        
+      const oldMemberCache = members.get(server);
+      if (oldMemberCache) return;
+      
+      const memberArr = [];
+      members.set(server, []);
+
+      const memberCache = members.get(server);
+      for (const member of response.members) {        
         // Don't add the same member to the cache, thats dumb
-        if (memberFromCache.find(m => m._id.user === member._id.user)) continue;
+        if (memberCache.find(m => m._id.user === member._id.user)) continue;
         
-        members.set(member._id.user, [...memberFromCache, member]);
+        memberArr.push(member);
         
         console.log("debug: cache values", members.values());
       }
+
+      members.set(server, memberArr);
       
       console.log("debug: done caching members", members);
     }
+    window.membersDebug = members;
   } catch (e) {
-    console.error("Failed to cache members", e.stack);
+    console.error(`Failed to cache members\n${e.message}\n${e.stack}`);
   }
+}
+
+async function cacheRolesFromServer(server) {
+  const info =
+    await fetch(
+      `https://api.revolt.chat/servers/${server}`, {headers: [["x-session-token", token]]}
+    ).then(async (res) => await res.json());
+
+  if (!info) throw "No information, somehow";
+
+  console.log(info.roles)
+
+  let currentServerRoles = roles.get(server);
+
+  if (!currentServerRoles || currentServerRoles === undefined) {
+    // Ensure there is an array to push elements to
+    roles.set(server, []);
+    currentServerRoles = roles.get(server);
+  }
+
+  // While we are there, cache all roles :)
+  for (const [key, value] of Object.entries(info.roles)) {
+    const foundRole = currentServerRoles.find(r => r.name === value.name);
+
+    if (foundRole) continue;
+    
+    currentServerRoles.push({ id: key, ...value});
+  }
+
+  roles.set(server, [...currentServerRoles])
+
+  console.log("debug: cached roles:", roles.get(server));  
 }
 
 async function loadChannels(server) {
@@ -344,12 +381,12 @@ async function loadChannels(server) {
   const info =
     servers.get(server) ||
     (await fetch(
-      `https://api.revolt.chat/servers/${server}?include_channels=true`,
+      `https://api.revolt.chat/servers/${server}?include_channels=true`, { header: [["x-session-token", token]]},
     ).then(async (res) => await res.json()));
 
   if (!info) throw "No information, somehow";
 
-  console.log(info.channels);
+  console.log(info.channels);  
 
   for await (const id of info.channels) {
     try {
@@ -411,10 +448,9 @@ async function loadMessagesFromChannel(channel) {
 
 serverNav.addEventListener("change", async (ev) => {
   if (ev.currentTarget.value === "DEFAULT") return;
-  
-  console.log("owo whats this:", this);
-  
+    
   await cacheMembersFromServer(ev.target.value);
+  await cacheRolesFromServer(ev.target.value);
   await loadChannels(ev.target.value);
 });
 
