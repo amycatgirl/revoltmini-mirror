@@ -41,6 +41,9 @@ navigator.serviceWorker?.register("sw.js");
 /** @type {number} */
 let interval;
 
+/** @type {boolean} */
+let isReconnectionNeeded = true;
+
 /** @type {string} */
 let currentChannelID = "";
 /** @type {string[]} */
@@ -97,8 +100,9 @@ async function GetVapid() {
 
 async function startSocket() {
   socket = new WebSocket((await GetWSLocation()) + "?format=json");
+  isReconnectionNeeded = true;
 
-  socket.addEventListener("open", () => {
+  socket.onopen = () => {
     console.log("debug: Opened connection with Bonfire");
     console.log("debug: attempting authentication");
     socket.send(JSON.stringify({ type: "Authenticate", token }));
@@ -107,9 +111,9 @@ async function startSocket() {
     interval = setInterval(() => {
       socket.send(JSON.stringify({ type: "Ping", data: Date.now() }));
     }, 20000);
-  });
+  };
 
-  socket.addEventListener("message", async (ev) => {
+  socket.onmessage = async (ev) => {
     const response = JSON.parse(ev.data);
 
     switch (response.type) {
@@ -164,22 +168,39 @@ async function startSocket() {
         MessageDisplay.append(renderer);
         break;
     }
-  });
+  };
 
-  socket.addEventListener("error", () => {
+  socket.onerror = () => {
     console.error(
       "debug: Something went wrong, we don't know what went wrong but something surely went wrong",
     );
-  });
+  };
 
-  socket.addEventListener("close", () => {
-    // please
-    stopPinging();
-  });
+  socket.onclose = () => {
+    isRecontectionNeeded = attemptReconection();
+    if (!isReconectionNeeded) {
+      console.error("debug/ws: failed to connect");
+    }
+  };
 }
 
 function stopPinging() {
   clearInterval(interval);
+}
+
+/**
+  Recursive Function, only alows 5 tries
+  @param {number} tries
+*/
+function attemptReconnection(tries = 0) {
+  console.log("debug/ws: attempt", tries);
+  if (tries > 5 || socket.readyState === 1) {
+    // Failed to reconnect or socket is already connected
+    return false;
+  }
+  
+  startSocket();
+  return true;
 }
 
 /**
@@ -224,7 +245,9 @@ function requestPush() {
   Destroy the session
 */
 async function closeConnectionAndLogOut() {
+  isReconnectionNeeded = false;
   socket.close();
+  stopPinging();
 
   try {
     await fetch(
