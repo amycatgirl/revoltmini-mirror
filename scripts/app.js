@@ -477,36 +477,46 @@ messageForm.addEventListener("submit", async (ev) => {
   toSend = messageBox.value;
   // dont you dare reload the page
   ev.preventDefault();
+  
+  sendBTN.disabled = true;
 
-  if (toBeUploaded && toBeUploaded.length > 0) {
-    attachments = await uploadAllImages(toBeUploaded);
+  try {
+    if (toBeUploaded && toBeUploaded.length > 0) {
+      attachments = await uploadAllImages(toBeUploaded);
+    }
+
+    const body =
+      attachments && attachments.length > 0
+        ? { content: toSend, attachments, replies }
+        : {
+            content: toSend,
+            replies,
+          };
+
+    await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
+      method: "POST",
+      headers: [["x-session-token", token]],
+      body: JSON.stringify(body),
+    }).then(() => {
+      toSend = "";
+      messageBox.value = "";
+      attachments = [];
+      toBeUploaded = [];
+      replies = [];
+      const selected = document.querySelectorAll(
+        "message-renderer[style^='border']",
+      );
+      for (const element of selected) {
+        element.style.border = "";
+      }
+    });
+  } catch (e) {
+    window.alert("Error whilst sending message", e.message);
+    console.error("debug: error whilst sending message", e.message, e.stack);
+  } finally {
+    sendBTN.disabled = false;
   }
 
-  const body =
-    attachments && attachments.length > 0
-      ? { content: toSend, attachments, replies }
-      : {
-          content: toSend,
-          replies,
-        };
-
-  await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
-    method: "POST",
-    headers: [["x-session-token", token]],
-    body: JSON.stringify(body),
-  }).then(() => {
-    toSend = "";
-    messageBox.value = "";
-    attachments = [];
-    toBeUploaded = [];
-    replies = [];
-    const selected = document.querySelectorAll(
-      "message-renderer[style^='border']",
-    );
-    for (const element of selected) {
-      element.style.border = "";
-    }
-  });
 });
 
 messageBox.addEventListener("keydown", (ev) => {
