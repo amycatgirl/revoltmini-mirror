@@ -33,6 +33,8 @@ function saveToken(token, location) {
   @returns {Promise<string>}
 */
 async function login(values, usePersistent = true) {
+  const loginBtn = document.getElementById("login");
+  if (loginBtn) loginBtn.disabled = true
   try {
     const response = await fetch("https://api.revolt.chat/auth/session/login", {
       method: "POST",
@@ -48,7 +50,6 @@ async function login(values, usePersistent = true) {
       const parsed = await response.json();
 
       if (parsed.result === "MFA") {
-        // Create a dialog that requires mfa
         const modal = document.createElement("dialog", { is: "custom-modal" });
         modal.setAttribute("title", "2 Factor Authentication");
         modal.setAttribute(
@@ -69,6 +70,8 @@ async function login(values, usePersistent = true) {
   } catch (e) {
     alert("Login Failed");
     console.error("debug: failed to log in", e.stack);
+  } finally {
+    if (loginBtn) loginBtn.disabled = false
   }
 }
 /**
