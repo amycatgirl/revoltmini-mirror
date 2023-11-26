@@ -46,6 +46,10 @@ function urlBase64ToUint8Array(base64String) {
 */
 function getRoleColour(message) {
   const found = messages.get(message);
+  if (found.masquerade) {
+    return found.masquerade.colour;
+  }
+  
   const author = found.author;
   const channel = channels.get(found.channel);
 

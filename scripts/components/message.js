@@ -136,13 +136,14 @@ async function UpdateContent(element) {
 
   // fetch author from either cache or by fetching them
 
-  const author =
+  const message = messages.get(messageToFetch);
+  
+  const author = message.masquerade ?
+    message.masquerade.name :
     users.get(authorToFetch) ??
     (await fetch(`https://api.revolt.chat/users/${authorToFetch}`, {
       headers: [["x-session-token", token]],
     }).then(async (res) => await res.json()));
-
-  const message = messages.get(messageToFetch);
 
   const roleColour = getRoleColour(messageToFetch);
 
@@ -192,7 +193,12 @@ async function UpdateContent(element) {
       console.log("blocked :)");
       break;
     default:
-      authorElement.textContent = `@${author.username}#${author.discriminator}`;
+      if (message.masquerade) {
+        authorElement.textContent = `@${author} (masquerade)`;
+      } else {
+        authorElement.textContent = `@${author.username}#${author.discriminator}`;
+      }
+      
       if (message.content) {
         messageContainer.innerHTML = DOMPurify.sanitize(
           markdownParser.parse(message.content),
