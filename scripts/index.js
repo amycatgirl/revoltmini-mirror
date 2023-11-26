@@ -4,7 +4,7 @@ import {
   startSocket,
   togglePage,
 } from "./app.js";
-import { TOKEN_LOCATION } from "./globals.js";
+import { TOKEN_LOCATION, CLIENT_FRIENDLY_NAME, VERSION } from "./globals.js";
 import { login } from "./login.js";
 import { getCookie } from "./utils.js";
 
@@ -53,6 +53,11 @@ if (lastSession) {
   togglePage();
 }
 
+if (CLIENT_FRIENDLY_NAME && VERSION) {
+  const title = document.querySelector("h1#name");
+  title.innerText = `${CLIENT_FRIENDLY_NAME} v${VERSION}`;
+}
+
 form.addEventListener("submit", async (ev) => {
   ev.preventDefault();
   token = await login(values, usePersistentSession);
@@ -74,9 +79,6 @@ checkbox.addEventListener("change", (ev) => {
 function setToken(newValue) {
   token = newValue;
 }
-
-window.logout = closeConnectionAndLogOut;
-window.requestPush = requestPush;
 
 // We are using token in a lot of places so why not let everyone use it
 export { token, setToken, storage };

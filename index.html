@@ -22,7 +22,7 @@
   <body>
     <main id="login">
       <header>
-      	<h1>RevoltMini</h1>
+      	<h1 id="name">RevoltMini</h1>
       	<p>Lightweight Web Client</p>
       </header>
       <form>
@@ -90,9 +90,9 @@
           <h1>Welcome to RevoltMini!</h1>
           <p>Use the dropdowns to navigate across servers</p>
           <p>Push notifications are available for mobile/desktop devices, but it needs your permission to enable them. Click the button below to allow RevoltMini to send notifications</p>
-          <button onclick="requestPush();">Request Notification Permission</button>
+          <button id="push">Request Notification Permission</button>
           <p>To log out, use the button below</p>
-          <button onclick="logout();">Log out from revolt</button>
+          <button id="logout">Log out from revolt</button>
         </div>
       </section>
       <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">

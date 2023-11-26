@@ -29,6 +29,12 @@ const sendBTN = document.querySelector("form#compose button");
 /** @type {HTMLElement} */
 const MessageDisplay = document.querySelector("section#middle");
 
+/** @type {HTMLButtonElement} */
+const logoutBtn = document.querySelector("button#logout");
+/** @type {HTMLButtonElement} */
+const requestBtn = document.querySelector("button#push");
+
+
 // Register Service Worker if browser supports it
 navigator.serviceWorker?.register("sw.js");
 
@@ -511,6 +517,9 @@ messageBox.addEventListener("keydown", (ev) => {
 
   toSend = ev.target.value;
 });
+
+requestBtn.addEventListener("click", async () => await requestPush());
+logoutBtn.addEventListener("click", async () => await closeConnectionAndLogOut());
 
 function setReplies(v) {
   replies = v;
