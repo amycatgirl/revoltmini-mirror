@@ -177,8 +177,8 @@ async function startSocket() {
   };
 
   socket.onclose = () => {
-    isRecontectionNeeded = attemptReconection();
-    if (!isReconectionNeeded) {
+    isReconnectionNeeded = attemptReconnection();
+    if (!isReconnectionNeeded) {
       console.error("debug/ws: failed to connect");
     }
   };
@@ -189,18 +189,34 @@ function stopPinging() {
 }
 
 /**
-  Recursive Function, only alows 5 tries
+  Recursive Function, only alows 10 tries
+  @async
   @param {number} tries
+  @returns {Promise<boolean>}
 */
-function attemptReconnection(tries = 0) {
+async function attemptReconnection(tries = 0) {
+  const delay = 2 ** tries * 300;
+
   console.log("debug/ws: attempt", tries);
-  if (tries > 5 || socket.readyState === 1) {
-    // Failed to reconnect or socket is already connected
-    return false;
+  console.log("debug/ws: delay of", delay);
+
+  try {
+    await startSocket();
+    return true;
+  } catch {
+    if (tries > 10 || socket.readyState === 1) {
+      // Failed to reconnect or socket is already connected
+      return false;
+    }
+    let newTry = tries + 1;
+
+    setTimeout(async () => {
+      await attemptReconnection(newTry);
+    }, delay);
+    
   }
   
-  startSocket();
-  return true;
+  
 }
 
 /**
