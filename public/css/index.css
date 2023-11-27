@@ -129,6 +129,29 @@ main#login form input:not([type="checkbox"])::placeholder {
   opacity: 50%;
 }
 
+dialog input:not([type="checkbox"]) {
+  transition: box-shadow 0.2s ease-in-out;
+  background-color: var(--secondary-bg);
+  color: var(--fg);
+  font-size: 1.2em;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: none;
+  box-shadow: none;
+  outline: none;
+
+  margin-right: 2rem;
+}
+
+dialog input:not([type="checkbox"])::placeholder {
+  color: var(--placeholder-fg);
+  opacity: 50%;
+}
+
+dialog input:not([type="checkbox"]):focus:focus-within {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
 main#login form button {
   transition: box-shadow 0.2s ease-in-out;
   padding: 0.5rem 1rem;
@@ -218,6 +241,7 @@ dialog button {
   outline: none;
   color: inherit;
   background-color: var(--primary-bg);
+  margin: 0 .2rem;
 }
 
 dialog button:hover {
