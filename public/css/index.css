@@ -4,6 +4,10 @@
 :root {
   --bg: #191919;
   --fg: #f6f6f6;
+  
+  /* Automod Compat*/
+  --foreground: var(--fg);
+  
   --accent: #fd6671;
   --primary-bg: #242424;
   --header-bg: #363636;
