@@ -559,10 +559,10 @@ messageForm.addEventListener("submit", async (ev) => {
       toBeUploaded = [];
       replies = [];
       const selected = document.querySelectorAll(
-        "message-renderer[style^='border']",
+        "message-renderer[style^='box-shadow']",
       );
       for (const element of selected) {
-        element.style.border = "";
+        element.style.boxShadow = "";
       }
     });
   } catch (e) {
