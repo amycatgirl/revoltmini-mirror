@@ -19,9 +19,9 @@ class Attachments extends HTMLElement {
         flex-flow: wrap column;
       }
       img, video {
-        border-radius: 5px;
-        max-width: 75%;
-        max-height: 50%;
+        border-radius: 10px;
+        max-width: 100%;
+        max-height: 100%;
       }
     `;
 

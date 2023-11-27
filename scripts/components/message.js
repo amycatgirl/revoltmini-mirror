@@ -35,6 +35,8 @@ class Message extends HTMLElement {
     style.innerText = `
       div.author, div.content {
         margin: 0;
+        user-select: none;
+        -webkit-user-select: none;
       }
         
       attachment-renderer {
@@ -50,17 +52,29 @@ class Message extends HTMLElement {
       a {
         color: var(--accent);
       }
+
+      pre {
+        box-shadow: 0 0px 0px 2px color-mix(in srgb, var(--secondary-bg) 50%, black 20%);
+        width: 50%;
+      }
+
       pre, code {
-        white-space: pre-wrap;
-        white-space: -moz-pre-wrap;
-        white-space: -pre-wrap;
-        white-space: -o-pre-wrap;
+        padding: .4rem;
+        border-radius: 5px;
+        background-color: var(--secondary-bg);
+        white-space: pre-wrap; 
         word-wrap: break-word;
+        line-height: 2;
         font-family: var(--font-mono);
       }
 
       p.blocked {
         color: red !important;
+      }
+
+      .noselect {
+        user-select: none;
+        -webkit-user-select: none;
       }
     `;
 
@@ -104,13 +118,13 @@ async function UpdateContent(element) {
           Array.from(replies.values()).find((el) => el.id === messageID)
         ) {
           console.log("debug: removing");
-          element.style.border = "";
+          element.style.boxShadow = "";
           // find element
           setReplies(replies.filter((el) => el.id !== messageID));
           console.log(replies);
         } else {
           console.log("debug: adding");
-          element.style.border = "1px solid var(--accent)";
+          element.style.boxShadow = "0 0 0 2px var(--accent)";
           replies.push({ id: messageID, mention: false });
         }
       }, 1500);
@@ -164,6 +178,7 @@ async function UpdateContent(element) {
   if (message.replies) {
     for (const id of message.replies.reverse()) {
       const replytxt = document.createElement("p");
+      replytxt.classList.add("noselect");
       const reply = messages.get(id);
       if (!reply) {
         replytxt.innerText = "↱ unknown message";

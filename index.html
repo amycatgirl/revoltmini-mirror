@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>RevoltMini</title>
-
+    
+    <link rel="stylesheet" href="public/css/index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+    
     <!-- Needed for basic functionality, sorry noscript/librejs users -->
     <script src="//unpkg.com/@ungap/custom-elements"></script>
     <script defer type="module" src="scripts/index.js"></script>
@@ -44,7 +47,10 @@
       <form>
         <input type="email" placeholder="Email" />
         <input type="password" placeholder="Password" />
-        <input type="checkbox" checked>Use persistent session</input>
+        <label id="persistent">
+          <input type="checkbox" checked></input>
+          Use persistent session
+        </label>
         <button id="login" type="submit">Login</button>
       </form>
       <section id="about">
@@ -52,263 +58,109 @@
           <summary>What is RevoltMini?</summary>
           <p>RevoltMini is a lightweight client for revolt.chat, which aims to
           be a fast, accessible client for low-end, mobile devices.</p>
-        </details>
-        <details id="howdoi">
-          <summary>How do I use RevoltMini?</summary>
-          <p>To navigate around the client, use the bar at the top. The first
+      </details>
+      <details id="howdoi" open>
+        <summary>How do I use RevoltMini?</summary>
+        <p>To navigate around the client, use the bar at the top. The first
+      </details>
+      <details id="howdoi" open>
+        <summary>How do I use RevoltMini?</summary>
+        <p>To navigate around the client, use the bar at the top. The first
           select input contains all of the servers you have joined. The second
           input contains the selected server's channels. Select one to go inside
           of a server/channel and you should be able to talk inside said channel.</p>
-        </details>
-        <details id="features">
-          <summary>What does RevoltMini support?</summary>
-          <p>RevoltMini supports the following features:</p>
-          <ul>
-            <li>Websockets</li>
-          	<li>Sending messages</li>
-          	<li>Attachments in messages</li>
-          	<li>2FA (through authenticator codes)</li>
-          	<li>Email Login</li>
-            <li>Partial Markdown support</li>
-            <li>Temporary Login using Cookies</li>
-          </ul>
-        </details>
-        <details id="wontfix">
-          <summary>Will there be feature parity with Revite/frontend?</summary>
-          <p>No. I do not plan 1:1 feature parity with Revite. <br />
+      </details>
+      <details id="features" open>
+        <summary>What does RevoltMini support?</summary>
+        <p>RevoltMini supports the following features:</p>
+        <ul>
+          <li>Websockets</li>
+          <li>Sending messages</li>
+          <li>Attachments in messages</li>
+          <li>2FA (through authenticator codes)</li>
+          <li>Email Login</li>
+          <li>Partial Markdown support</li>
+          <li>Temporary Login using Cookies</li>
+        </ul>
+      </details>
+      <details id="wontfix" open>
+        <summary>Will there be feature parity with Revite/frontend?</summary>
+        <p>No. I do not plan 1:1 feature parity with Revite. <br />
+      </details>
+      <details id="features" open>
+        <summary>What does RevoltMini support?</summary>
+        <p>RevoltMini supports the following features:</p>
+        <ul>
+          <li>Websockets</li>
+          <li>Sending messages</li>
+          <li>Attachments in messages</li>
+          <li>2FA (through authenticator codes)</li>
+          <li>Email Login</li>
+          <li>Partial Markdown support</li>
+          <li>Temporary Login using Cookies</li>
+        </ul>
+      </details>
+      <details id="wontfix" open>
+        <summary>Will there be feature parity with Revite/frontend?</summary>
+        <p>No. I do not plan 1:1 feature parity with Revite. <br />
           Only the bare minimum amount of features will be implemented inside
           of RevoltMini to keep it lightweight and easy to run.</p>
-          <p>Some notable features include:</p>
-          <ul>
-          	<li>Masquerades</li>
-          	<li>Roles and Permissions</li>
-          	<li>Settings</li>
-          	<li>Multiple Sessions</li>
-          	<li>Topics (Channel descriptions)</li>
-          </ul>
-        </details>
-      </section>
-    </main>
-    <main id="app" class="hidden">
-      <header id="top" class="bar flex stick anchor-top anchor-left">
-        <nav>
-          <form id="navigation">
-            <select name="DEFAULT" id="server">
-              <option value="DEFAULT">Select a server</option>
-            </select>
-            <select id="channel">
-            </select>
-          </form>
-        </nav>
-      </header>
-      <section id="middle">
-        <div class="intro">
-          <h1>Welcome to RevoltMini!</h1>
-          <p>Use the dropdowns to navigate across servers</p>
-          <p>Push notifications are available for mobile/desktop devices, but it needs your permission to enable them. Click the button below to allow RevoltMini to send notifications</p>
-          <button id="push">Request Notification Permission</button>
-          <p>To log out, use the button below</p>
-          <button id="logout">Log out from revolt</button>
-        </div>
-      </section>
-      <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
-        <form id="compose" class="grid">
-          <input type="file" accept="*" id="attach"></input>
-          <label for="attach">+</label>
-          <textarea
-            type="text"
-            id="content"
-            placeholder="Send message"
-          ></textarea>
-          <button id="send">Send</button>
+        <p>Some notable features include:</p>
+        <ul>
+          <li>Masquerades</li>
+          <li>Roles and Permissions</li>
+          <li>Settings</li>
+          <li>Multiple Sessions</li>
+          <li>Topics (Channel descriptions)</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+  <main id="app" class="hidden">
+    <header id="top" class="bar flex stick anchor-top anchor-left">
+      <nav>
+        <form id="navigation">
+          <select name="DEFAULT" id="server">
+            <option value="DEFAULT">Select a server</option>
+          </select>
+          <select id="channel">
+          </select>
         </form>
-      </section>
-    </main>
-  </body>
+      </nav>
+    </header>
+    <section id="middle">
+      <div class="intro">
+        <h1>Welcome to RevoltMini!</h1>
+        <p>Use the dropdowns to navigate across servers</p>
+        <p>Push notifications are available for mobile/desktop devices, but it needs your permission to enable them.
+          Click the button below to allow RevoltMini to send notifications</p>
+        <button id="push"><material-symbols name="notifications"></material-symbols> Request Notification
+          Permission</button>
+        <p>To log out, use the button below</p>
+        <button id="logout"><material-symbols optical-size="9" name="logout"></material-symbols> Log out from
+          revolt</button>
+      </div>
+    </section>
+    <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
+      <div class="indicator">
+        <div class="status">
+          <!-- Dot stuff goes here -->
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="names">
+          <span>3 users are typing</span>
+        </div>
+      </div>
+      <form id="compose" class="grid">
+        <input type="file" accept="*" id="attach" />
+        <label for="attach"><material-symbols name="attach_file_add" /></label>
+        <textarea type="text" id="content" placeholder="Send message"></textarea>
+        <button id="send"><material-symbols optical-size="9" name="send" /></button>
+      </form>
+    </section>
+  </main>
+</body>
 
-  <style>
-    @import url("public/fonts/jbmono/jetbrains-mono.css");
-
-    :root {
-      --bg: #191919;
-      --fg: #F6F6F6;
-      --accent: #FD6671;
-      --primary-bg: #242424;
-      --header-bg: #363636;
-      --secondary-bg: #1E1E1E;
-      --secondary-fg: #C8C8C8;
-      --font-sans: -apple-system, BlinkMacSystemFont,
-                   "Segoe UI", system-ui, Roboto, Oxygen-Sans, Ubuntu, Cantarell,
-                    "Helvetica Neue", sans-serif;
-      --font-mono: "JetBrains Mono", monospace;
-    }
-
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #F6F6F6;
-        --fg: #000;
-        --accent: #FD6671;
-        --primary-bg: #fff;
-        --header-bg: #f1f1f1;
-        --secondary-bg: #f1f1f1;
-        --secondary-fg: #1f1f1f;
-      }
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      width: 100%;
-      height: 100vh;
-      margin: 0 0;
-      padding: 0 0;
-      background-color: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-sans);
-      overscroll-behavior-y: contain;
-    }
-
-    #app {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: 4rem 1fr 3rem;
-      height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .bar {
-      padding: 5px;
-      background-color: gray;
-    }
-
-    .bar.flex {
-      display: flex;
-      gap: 2px;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .stick {
-      position: sticky;
-    }
-
-    .anchor-bottom {
-      bottom: 0;
-    }
-
-    .anchor-left {
-      left: 0;
-    }
-
-    .anchor-right {
-      right: 0;
-    }
-
-    .anchor-top {
-      top: 0;
-    }
-
-    header#top {
-      grid-area: 1 / 1 / 2 / 2;
-      background-color: var(--header-bg);
-      display: flex;
-      flex-flow: column nowrap;
-    }
-
-    header#top select {
-      background-color: var(--secondary-bg);
-      color: var(--secondary-fg);
-      border: none;
-      padding: 5px;
-      width: 100%;
-    }
-
-    section#middle {
-      grid-area: 2 / 1 / 3 / 2;
-      display: flex;
-      flex-flow: column nowrap;
-    }
-
-    section#middle .intro {
-      margin-top: auto;
-      margin-bottom: auto;
-      align-self: center;
-    }
-
-    section#messagebox {
-      grid-area: 3 / 1 / 4 / 2;
-      background-color: var(--primary-bg);
-      user-select: none;
-    }
-
-    section#middle {
-      overflow-y: auto;
-      overflow-wrap: break-word;
-    }
-
-    section#info h1 {
-      font-size: 100%;
-    }
-
-    section#messagebox {
-      box-sizing: border-box;
-    }
-
-    #compose.grid #content {
-      background-color: var(--secondary-bg);
-      color: var(--secondary-fg);
-      width: 100%;
-      resize: none;
-    }
-
-    #compose.grid {
-      display: inline-flex;
-      width: 100%;
-      height: 100%;
-    }
-
-    #compose.grid textarea {
-      background-color: var(--primary-bg);
-      color: var(--fg);
-      font-family: var(--font-sans);
-      border:none;
-    }
-
-    #compose.grid textarea::placeholder {
-      color: var(--fg);
-      opacity: 50%;
-    }
-
-    #compose.grid #attach {
-      display: none;
-    }
-
-    #compose.grid label[for="attach"] {
-      width: 15%;
-      border-radius: 5px 0 0 5px;
-    }
-
-    #compose.grid button#send {
-      width: 25%;
-      border-radius: 0 5px 5px 0;
-    }
-
-    #compose.grid label[for="attach"],
-    #compose.grid button#send {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      background-color: var(--header-bg);
-      color: var(--fg);
-      border: none;
-    }
-  </style>
 </html>
