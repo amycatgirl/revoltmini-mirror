@@ -1,6 +1,6 @@
 const CLIENT_FRIENDLY_NAME = "RevoltMini";
-const VERSION = "0.1";
-const COMMIT = "e07278b";
+const VERSION = "0.2";
+const COMMIT = "af18e57";
 const TOKEN_LOCATION = "jar";
 const ENCODE_TOKEN = true;
 
