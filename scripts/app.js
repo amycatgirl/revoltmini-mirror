@@ -313,6 +313,12 @@ async function uploadAllImages(images) {
 // Channels, servers, etc...
 
 function loadServers() {
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "DEFAULT";
+  defaultOption.innerText = "Select a server";
+
+  const elements = [defaultOption];
+
   // Load from cache
   for (const [id, server] of servers.entries()) {
     const option = document.createElement("option");
@@ -320,8 +326,12 @@ function loadServers() {
     option.value = id;
     option.innerText = server.name;
 
-    serverNav.append(option);
+    elements.push(option);
   }
+
+  console.log(elements);  
+
+  serverNav.replaceChildren(...elements);
 }
 
 /**
