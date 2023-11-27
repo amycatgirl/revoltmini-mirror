@@ -476,7 +476,13 @@ async function loadMessagesFromChannel(channel) {
 }
 
 serverNav.addEventListener("change", async (ev) => {
-  if (ev.currentTarget.value === "DEFAULT") return;
+  if (ev.currentTarget.value === "DEFAULT") {
+    const intro = document.querySelector("template#intro");
+    MessageDisplay.replaceChildren(intro.content.cloneNode(true));
+
+    channelNav.replaceChildren();
+    return;
+  };
     
   await cacheMembersFromServer(ev.target.value);
   await cacheRolesFromServer(ev.target.value);
