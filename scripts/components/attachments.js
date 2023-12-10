@@ -47,9 +47,6 @@ class Attachments extends LitElement {
   connectedCallback() {
       super.connectedCallback();
       const message = messages.get(this.message);
-
-      console.log(message, this.message);
-
       this._attachments = message.attachments;
   }
 }
