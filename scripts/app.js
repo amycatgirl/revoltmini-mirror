@@ -166,7 +166,7 @@ async function startSocket() {
         switch (USE_NEW_RENDERER) {
             case true:
                 const newRenderer = document.createElement("lit-message-renderer");
-                newRenderer.setAttribute("message", strippedResponse._id);
+                newRenderer.setAttribute("message-id", strippedResponse._id);
 
                 MessageDisplay.appendChild(newRenderer);
               break;
