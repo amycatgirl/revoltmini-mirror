@@ -223,11 +223,8 @@ async function UpdateContent(element) {
       }
 
       if (message.attachments) {
-        const stringified = message.attachments
-          .map((el) => JSON.stringify(el))
-          .join("$");
         const attachmentDisplay = document.createElement("attachment-renderer");
-        attachmentDisplay.setAttribute("elements", stringified);
+        attachmentDisplay.setAttribute("message-id", message._id);
 
         shadowDOM.append(attachmentDisplay);
       }

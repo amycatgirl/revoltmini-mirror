@@ -1,19 +1,15 @@
-class Attachments extends HTMLElement {
-  static get observedAttributes() {
-    return ["elements"];
+import {css, html, LitElement} from "lit";
+import {messages} from "../cache";
+
+class Attachments extends LitElement {
+
+  static properties = {
+    message: { type: String, attribute: "message-id" },
+    _attachments: {}
   }
 
-  constructor() {
-    super();
-
-    const shadow = this.attachShadow({ mode: "open" });
-    const container = document.createElement("div");
-    const style = document.createElement("style");
-
-    container.id = "imagecontainer";
-
-    style.innerText = `
-      #imagecontainer {
+  static styles = css`
+    #imagecontainer {
         margin: 0 4px;
         display: flex;
         flex-flow: wrap column;
@@ -23,48 +19,38 @@ class Attachments extends HTMLElement {
         max-width: 100%;
         max-height: 100%;
       }
-    `;
+  `
 
-    shadow.append(container, style);
+  constructor() {
+      super();
+      this._attachments = [];
+  }
+
+  render() {
+    return html`
+      <div id="imagecontainer">
+        ${this._attachments.map((attachment) => {
+          if (attachment.content_type.includes("image")) {
+                return html`
+                  <img id=${attachment._id} src=${'https://autumn.revolt.chat/attachments/' + attachment._id + "/" + attachment.filename} />
+                `
+          } else if (attachment.content_type.includes("video")) {
+            return html`
+              <video controls src=${'https://autumn.revolt.chat/attachments/' + attachment._id + "/" + attachment.filename} id=${attachment._id}/>
+            `
+          }
+        })}
+      </div>
+    `
   }
 
   connectedCallback() {
-    const shadow = this.shadowRoot;
-    const container = shadow.getElementById("imagecontainer");
-    const ATTACHMENTS = this.getAttribute("elements")
-      .split("$")
-      .map((el) => JSON.parse(el));
+      super.connectedCallback();
+      const message = messages.get(this.message);
 
-    for (const attachment of ATTACHMENTS) {
-      if (attachment.content_type.includes("image")) {
-        const imageAttachment = document.createElement("img");
-        imageAttachment.loading = "lazy";
-        imageAttachment.alt =
-          "Attachment alt text has not been implemented in Delta/Autumn";
-        imageAttachment.id = attachment._id;
-        imageAttachment.src =
-          "https://autumn.revolt.chat/attachments/" +
-          attachment._id +
-          "/" +
-          attachment.filename;
-        imageAttachment.width = attachment.metadata.width;
-        imageAttachment.height = attachment.metadata.height;
+      console.log(message, this.message);
 
-        container.append(imageAttachment);
-      } else if (attachment.content_type.includes("video")) {
-        const videoAttachment = document.createElement("video");
-        videoAttachment.controls = true;
-        videoAttachment.alt =
-          "Attachment alt text has not been implemented in Delta/Autumn";
-        videoAttachment.id = attachment._id;
-        videoAttachment.src =
-          "https://autumn.revolt.chat/attachments/" +
-          attachment._id +
-          "/" +
-          attachment.filename;
-        container.append(videoAttachment);
-      }
-    }
+      this._attachments = message.attachments;
   }
 }
 
