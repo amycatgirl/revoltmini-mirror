@@ -1,9 +1,15 @@
-import { Message } from "./message.js";
-import { Modal } from "./modal.js";
-import { Attachments } from "./attachments.js";
-import { MDSymbols } from "./mdsymbols.js";
+import {Message} from "./message";
+import {Modal} from "./modal";
+import {Attachments} from "./attachments";
+import {MDSymbols} from "./mdsymbols";
+import {ColouredText} from "./messaging/ColouredText";
+import {LitMessageRenderer} from "./messaging/MessageRenderer";
+import {Markdown} from "./messaging/Markdown";
 
 customElements.define("message-renderer", Message);
+customElements.define("markdown-renderer", Markdown);
+customElements.define("lit-message-renderer", LitMessageRenderer);
 customElements.define("attachment-renderer", Attachments);
 customElements.define("material-symbols", MDSymbols);
-customElements.define("custom-modal", Modal, { extends: "dialog" });
+customElements.define("coloured-text", ColouredText);
+customElements.define("custom-modal", Modal, {extends: "dialog"});

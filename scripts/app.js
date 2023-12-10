@@ -1,3 +1,4 @@
+// @refresh reload
 import {
   channels,
   emojis,
@@ -9,6 +10,7 @@ import {
 } from "./cache.js";
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
+import {USE_NEW_RENDERER} from "./globals";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -160,12 +162,22 @@ async function startSocket() {
         messages.set(strippedResponse._id, strippedResponse);
 
         if (strippedResponse.channel !== currentChannelID) break;
-        /** @type {string} */
-        const renderer = document.createElement("message-renderer");
-        renderer.setAttribute("author", strippedResponse.author);
-        renderer.setAttribute("message", strippedResponse._id);
 
-        MessageDisplay.append(renderer);
+        switch (USE_NEW_RENDERER) {
+            case true:
+                const newRenderer = document.createElement("lit-message-renderer");
+                newRenderer.setAttribute("message", strippedResponse._id);
+
+                MessageDisplay.appendChild(newRenderer);
+              break;
+            case false:
+              const renderer = document.createElement("message-renderer");
+              renderer.setAttribute("author", strippedResponse.author);
+              renderer.setAttribute("message", strippedResponse._id);
+
+              MessageDisplay.appendChild(renderer);
+              break;
+        }
         break;
     }
   };
@@ -491,13 +503,24 @@ async function loadMessagesFromChannel(channel) {
     messages.set(message._id, message);
 
     // Wouldn't it be better if i use webcomponents for this
-    // not it wasnt
+    // no, it wasnt
 
-    const renderer = document.createElement("message-renderer");
-    renderer.setAttribute("author", message.author);
-    renderer.setAttribute("message", message._id);
+    switch (USE_NEW_RENDERER) {
+        case true:
+          const newRenderer = document.createElement("lit-message-renderer");
+          newRenderer.setAttribute("message-id", message._id);
 
-    MessageDisplay.append(renderer);
+          MessageDisplay.appendChild(newRenderer);
+          break;
+        case false:
+          const renderer = document.createElement("message-renderer");
+          renderer.setAttribute("author", message.author);
+          renderer.setAttribute("message", message._id);
+
+          MessageDisplay.append(renderer);
+          break;
+    }
+
   }
 }
 
