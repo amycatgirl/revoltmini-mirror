@@ -11,6 +11,7 @@ import {
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
 import {USE_NEW_RENDERER} from "./globals";
+import {updateIndicatorValues} from "./indicator";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -45,6 +46,9 @@ let interval;
 
 /** @type {boolean} */
 let isReconnectionNeeded = true;
+
+/** @type {string[]} */
+let typing = [];
 
 /** @type {string} */
 let currentChannelID = "";
@@ -178,6 +182,21 @@ async function startSocket() {
               MessageDisplay.appendChild(renderer);
               break;
         }
+        break;
+
+        case "ChannelStartTyping":
+          if (currentChannelID !== response.id) break;
+          if (typing.includes(response.user)) break;
+          typing.push(response.user);
+          updateIndicatorValues(typing);
+          console.log(typing);
+          break;
+
+          case "ChannelStopTyping":
+            if (currentChannelID !== response.id) break;
+            typing = typing.filter((el) => el !== response.user);
+            updateIndicatorValues(typing)
+        console.log(typing)
         break;
     }
   };
