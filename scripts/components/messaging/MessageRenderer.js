@@ -3,6 +3,7 @@ import {Marked} from "marked";
 import DOMPurify from "dompurify";
 import {messages, users} from "../../cache";
 import {replies, setReplies} from "../../app";
+import { getRoleColour } from "../../utils";
 
 class LitMessageRenderer extends LitElement {
     
@@ -31,6 +32,7 @@ class LitMessageRenderer extends LitElement {
         messageID: {type: String, attribute: "message-id"},
         _message: {},
         _author: {},
+        _roleColour: {}
     }
 
     _holdTimer;
@@ -41,6 +43,7 @@ class LitMessageRenderer extends LitElement {
 
         this._message = {};
         this._author = {};
+        this._roleColour = css`var(--fg)`;
 
         this._parser = new Marked();
     }
@@ -49,10 +52,10 @@ class LitMessageRenderer extends LitElement {
         return html`
             ${this.getReplies()}
             <div class="author">
-                <span>@${this._author.username}</span>
+                <coloured-text .colour=${this._roleColour} text=${this._author.username}></coloured-text>
             </div>
             <div class="content">
-                <markdown-renderer content=${this._message.content} />
+                <markdown-renderer content=${this._message.content}></markdown-renderer>
             </div>
         `
     }
@@ -63,7 +66,10 @@ class LitMessageRenderer extends LitElement {
         this._message = messages.get(this.messageID);
         this._author = this._message.masquerade ? this._message.masquerade.name : users.get(this._message.author);
 
+        this._roleColour = getRoleColour(this.messageID);
+
         console.log(this._message);
+        console.log(this._roleColour);
 
         this.addEventListener(
             "touchstart",

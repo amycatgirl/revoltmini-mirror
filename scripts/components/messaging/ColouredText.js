@@ -1,31 +1,39 @@
-import {LitElement, html, css} from 'lit';
+import {LitElement, html, css, unsafeCSS} from 'lit';
+import {styleMap} from 'lit/directives/style-map.js'
 
 class ColouredText extends LitElement {
 
-    static  properties = {
-        color: {type: String},
+    static properties = {
+        colour: {type: String},
         text: {type: String},
+        _styles: {}
     }
 
-    static styles =
-        css`
-            :host {
-                color: var(--text-color);
-                background: var(--background-color);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
-        `;
+    constructor() {
+        super();
+
+        this.colour = "var(--fg)";
+
+        this._styles = {
+            background: unsafeCSS(this.colour),
+            "background-clip": "text",
+            "-moz-text-fill-color": "transparent",
+            "-webkit-text-fill-color": "transparent",
+            "font-weight": 600
+        }
+
+        this.text = "";
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+
+        this._styles.background = unsafeCSS(this.colour);
+    }
 
     render() {
-        return html`${this.text}`;
-    }
-
-    updated(changedProps) {
-        if (changedProps.has('color')) {
-            this.style.setProperty('--text-color', this.color);
-            this.style.setProperty('--background-color', this.color);
-        }
+        console.log(this.colour);
+        return html`<span style=${styleMap(this._styles)}>${this.text}</span>`;
     }
 }
 
