@@ -4,10 +4,10 @@
 :root {
   --bg: #191919;
   --fg: #f6f6f6;
-  
+
   /* Automod Compat*/
   --foreground: var(--fg);
-  
+
   --accent: #fd6671;
   --primary-bg: #242424;
   --header-bg: #363636;
@@ -73,6 +73,7 @@ main#login form {
   grid-row-start: 2;
   grid-row-end: 4;
 }
+
 main#login section#about {
   background-color: var(--secondary-bg);
   padding: 0.5rem;
@@ -220,7 +221,7 @@ main#login form label input[type="checkbox"]::before {
   width: 1rem;
   height: 1rem;
   transform: scale(0);
-  transition: .2s transform cubic-bezier(0,0,0,1);
+  transition: .2s transform cubic-bezier(0, 0, 0, 1);
   border-radius: 5px;
   box-shadow: inset 1em 1em var(--accent);
 }
@@ -356,7 +357,7 @@ section#middle .intro {
 }
 
 section#middle .intro button {
-  display:flex;
+  display: flex;
   gap: .5rem;
   flex-direction: row;
   align-items: center;
@@ -521,7 +522,7 @@ message-renderer:hover {
   section#about {
     background-color: transparent !important;
     padding: 0;
-    margin: 0   ;
+    margin: 0;
   }
 
 }
@@ -534,5 +535,20 @@ message-renderer:hover {
   to {
     opacity: 35%;
   }
-  
+
+}
+
+noscript .error {
+  background-color: var(--accent);
+  color: black;
+
+  width: 100vw;
+  height: 100vh;
+
+  position: fixed;
+  top: 0;
+
+  padding: 5px;
+
+  z-index: 10;
 }

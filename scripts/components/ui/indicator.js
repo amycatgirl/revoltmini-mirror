@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, css, LitElement, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 
 class Indicator extends LitElement {
@@ -33,8 +33,8 @@ class Indicator extends LitElement {
           background-color: var(--accent);
         }
 
-        .warning ::slotted(*),
-        .error ::slotted(*) {
+        .warning span,
+        .error span  {
           color: black !important;
           font-weight: 600;
         }
@@ -99,6 +99,42 @@ class Indicator extends LitElement {
         :host .information {
           color: var(--fg);
         }
+
+        .ring {
+          animation: rotate 2s linear infinite;
+          width: 20px;
+          height: 20px;
+          stroke: #fff;
+        }
+
+        .path {
+          stroke: hsl(210, 70, 75);
+          stroke-linecap: round;
+          animation: dash 1.5s ease-in-out infinite
+        }
+
+        @keyframes rotate {
+          100% {
+            transform: rotate(360deg)
+          }
+        }
+
+        @keyframes dash {
+          0% {
+            stroke-dasharray: 1, 150;
+            stroke-dashoffset: 0
+          }
+
+          50% {
+            stroke-dasharray: 90, 150;
+            stroke-dashoffset: -35
+          }
+
+          100% {
+            stroke-dasharray: 90, 150;
+            stroke-dashoffset: -124
+          }
+        }
     
          @keyframes fade {
           from {
@@ -119,7 +155,7 @@ class Indicator extends LitElement {
                 ${this.renderLoader()}
             </div>
             <div class="information">
-                <slot></slot>
+                <span><slot></slot></span>
             </div>
           </div>
         `
@@ -136,8 +172,10 @@ class Indicator extends LitElement {
                 `;
       case "ring":
         return html`
-                    <span class="ring"></span>
+                    <svg class="ring" viewBox="0 0 50 50"> <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>
                 `;
+      case "none":
+        return nothing;
     }
   }
 

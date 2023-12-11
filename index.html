@@ -1,64 +1,66 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RevoltMini</title>
-    
-    <link rel="stylesheet" href="public/css/index.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
-    
-    <!-- Needed for basic functionality, sorry noscript/librejs users -->
-    <script src="//unpkg.com/@ungap/custom-elements"></script>
-    <script defer type="module" src="scripts/index.js"></script>
-    <script defer type="module" src="scripts/components/index.js"></script>
 
-    <!-- Needed for markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-    <!-- TODO: Add LibMFM whenever that comes out -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RevoltMini</title>
 
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
-  </head>
-  <body>
-    <noscript>
-      <!--TODO: Style this to be an overlay-->
-      <div class="error">
-        <h1>Oops! It seems that you've disabled Javascript for this site!</h1>
-        <p>Hi, Amy here.</p>
-        <p>You seem to have some sort of noscript extension installed that is
+  <link rel="stylesheet" href="public/css/index.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+
+  <!-- Needed for basic functionality, sorry noscript/librejs users -->
+  <script src="//unpkg.com/@ungap/custom-elements"></script>
+  <script defer type="module" src="scripts/index.js"></script>
+  <script defer type="module" src="scripts/components/index.js"></script>
+
+  <!-- Needed for markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <!-- TODO: Add LibMFM whenever that comes out -->
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
+</head>
+
+<body>
+  <noscript>
+    <!--TODO: Style this to be an overlay-->
+    <div class="error">
+      <h1>Oops! It seems that you've disabled Javascript for this site!</h1>
+      <p>Hi, Amy here.</p>
+      <p>You seem to have some sort of noscript extension installed that is
         blocking execution of files that RevoltMini depends on.</p>
-        <p>If you are not using a noscript extension but using libreJS, please
+      <p>If you are not using a noscript extension but using libreJS, please
         whitelist RevoltMini's files and JSDelivr files to continue using
         RevoltMini.</p>
-        <p>My source code is available under the MIT License over at
+      <p>My source code is available under the MIT License over at
         <a href="https://codeberg.org/amycatgirl/revoltmini">amycatgirl/revoltmini</a>
-        if you are interested on seeing what data I collect inside RevoltMini</p>
-        <p>Spoiler alert: I colect no data!</p>
-      </div>
-    </noscript>
-    <main id="login">
-      <header>
-      	<h1 id="name">RevoltMini</h1>
-      	<p>Lightweight Web Client</p>
-      </header>
-      <form>
-        <input type="email" placeholder="Email" />
-        <input type="password" placeholder="Password" />
-        <label id="persistent">
-          <input type="checkbox" checked></input>
-          Use persistent session
-        </label>
-        <button id="login" type="submit">Login</button>
-      </form>
-      <section id="about">
-        <details id="whatis" open>
-          <summary>What is RevoltMini?</summary>
-          <p>RevoltMini is a lightweight client for revolt.chat, which aims to
+        if you want to peek through code.
+      </p>
+    </div>
+  </noscript>
+  <main id="login">
+    <header>
+      <h1 id="name">RevoltMini</h1>
+      <p>Lightweight Web Client</p>
+    </header>
+    <form>
+      <input type="email" placeholder="Email" />
+      <input type="password" placeholder="Password" />
+      <label id="persistent">
+        <input type="checkbox" checked></input>
+        Use persistent session
+      </label>
+      <button id="login" type="submit">Login</button>
+    </form>
+    <section id="about">
+      <details id="whatis" open>
+        <summary>What is RevoltMini?</summary>
+        <p>RevoltMini is a lightweight client for revolt.chat, which aims to
           be a fast, accessible client for low-end, mobile devices.</p>
-        </details>
+      </details>
       <details id="howdoi" open>
         <summary>How do I use RevoltMini?</summary>
         <p>To navigate around the client, use the bar at the top. The first
@@ -106,6 +108,26 @@
           </select>
         </form>
       </nav>
+      <snackbar-indicator
+        id="cache"
+        spinner-type="ring"
+        hidden="true">
+        Populating Cache...
+      </snackbar-indicator>
+      <snackbar-indicator
+        id="reconnecting"
+        variant="warning"
+        spinner-type="dot"
+        hidden="true">
+        Reconnecting...
+      </snackbar-indicator>
+      <snackbar-indicator
+        id="lostconnection"
+        variant="error"
+        spinner-type="none"
+        hidden="true">
+        Lost connection to Revolt.
+      </snackbar-indicator>
     </header>
     <section id="middle">
       <div class="intro">

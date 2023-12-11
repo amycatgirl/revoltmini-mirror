@@ -11,7 +11,6 @@ import {
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
 import {USE_NEW_RENDERER} from "./globals";
-import {updateIndicatorValues} from "./indicator";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -37,8 +36,10 @@ const logoutBtn = document.querySelector("button#logout");
 /** @type {HTMLButtonElement} */
 const requestBtn = document.querySelector("button#push");
 
-const typingIndicator = document.querySelector("snackbar-indicator#typing")
-
+const typingIndicator = document.querySelector("snackbar-indicator#typing");
+const reconnectingIndicator = document.querySelector("snackbar-indicator#reconnecting");
+const connectionIndicator = document.querySelector("snackbar-indicator#lostconnection");
+const cacheIndicator = document.querySelector("snackbar-indicator#cache");
 
 // Register Service Worker if browser supports it
 navigator.serviceWorker?.register("sw.js");
@@ -133,28 +134,41 @@ async function startSocket() {
         console.log(`debug: Hi!`);
 
         // Add everything into cache :)
+        cacheIndicator.setAttribute("hidden", "false");
+        cacheIndicator.innerText = "Populating server cache...";
 
-        for (const server of response.servers) {
+        for await (const [index, server] of response.servers.entries()) {
+          cacheIndicator.innerText = `Populating cache, server ${index + 1} out of ${response.servers.length}`;
           servers.set(server._id, server);
         }
 
         console.log("debug/cache: Servers cached.", servers);
 
-        for (const channel of response.channels) {
+        cacheIndicator.innerText = "Populating channel cache...";
+
+        for await (const [index, channel] of response.channels.entries()) {
+          cacheIndicator.innerText = `Populating cache, channel ${index + 1} out of ${response.channels.length}`;
           channels.set(channel._id, channel);
         }
 
         console.log("debug/cache: Channels cached.", channels);
 
-        for (const user of response.users) {
+        
+
+        for await (const [index, user] of response.users.entries()) {
+          cacheIndicator.innerText = `Populating cache, user ${index + 1} out of ${response.users.length}`;
           users.set(user._id, user);
         }
 
         console.log("debug/cache: Users cached.", users);
 
+        cacheIndicator.innerText = "Populating emoji cache...";
+
         for (const emoji of response.emojis) {
           emojis.set(emoji._id, emoji);
         }
+
+        cacheIndicator.setAttribute("hidden", "true");
 
         console.log("debug/cache: Emojis cached", emojis);
         console.log("debug/cache: Everything is in cache!");
@@ -235,6 +249,8 @@ function stopPinging() {
   @returns {Promise<boolean>}
 */
 async function attemptReconnection(tries = 0) {
+  reconnectingIndicator.setAttribute("hidden", "false");
+  reconnectingIndicator.innerText = `Reconnecting${tries > 0 ? `, attempt ${tries} out of 10` : ""}`
   const delay = 2 ** tries * 300;
 
   console.log("debug/ws: attempt", tries);
@@ -242,6 +258,7 @@ async function attemptReconnection(tries = 0) {
 
   try {
     await startSocket();
+    reconnectingIndicator.setAttribute("hidden", "true");
     return true;
   } catch {
     if (tries > 10 || socket.readyState === 1) {
@@ -369,6 +386,9 @@ async function uploadAllImages(images) {
 // Channels, servers, etc...
 
 function loadServers() {
+  cacheIndicator.setAttribute("hidden", "false");
+  cacheIndicator.innerText = "Loading servers...";
+
   const defaultOption = document.createElement("option");
   defaultOption.value = "DEFAULT";
   defaultOption.innerText = "Select a server";
@@ -388,6 +408,7 @@ function loadServers() {
   console.log(elements);  
 
   serverNav.replaceChildren(...elements);
+  cacheIndicator.setAttribute("hidden", "true");
 }
 
 /**
@@ -396,6 +417,9 @@ function loadServers() {
 */
 async function cacheMembersFromServer(server) {
   try {
+    cacheIndicator.setAttribute("hidden", "false");
+    cacheIndicator.innerText = "Populating member cache, please wait...";
+
     const response = await fetch(
       `https://api.revolt.chat/servers/${server}/members`,
       {
@@ -428,6 +452,8 @@ async function cacheMembersFromServer(server) {
     window.membersDebug = members;
   } catch (e) {
     console.error(`Failed to cache members\n${e.message}\n${e.stack}`);
+  } finally {
+    cacheIndicator.setAttribute("hidden", "true");
   }
 }
 
@@ -473,6 +499,10 @@ async function loadChannels(server) {
 
   channelNav.add(defaultOption);
 
+  try {
+    cacheIndicator.setAttribute("hidden", "false");
+    cacheIndicator.innerText = "Loading channels...";
+
   const info =
     servers.get(server) ||
     (await fetch(
@@ -503,6 +533,16 @@ async function loadChannels(server) {
       channelNav.append(option);
     } catch {}
   }
+
+  } catch {
+
+  } finally {
+    cacheIndicator.setAttribute("hidden", "true");
+  }
+
+  
+
+  cacheIndicator.setAttribute("hidden", "true");
 }
 
 /**
@@ -511,45 +551,55 @@ async function loadChannels(server) {
 async function loadMessagesFromChannel(channel) {
   MessageDisplay.replaceChildren();
 
-  const response = await fetch(
-    `https://api.revolt.chat/channels/${channel}/messages?limit=100&include_users=true`,
-    { headers: [["x-session-token", token]] },
-  ).then(async (res) => await res.json());
+  cacheIndicator.setAttribute("hidden", "false");
+  cacheIndicator.innerText = "Loading messages...";
 
-  // Response is divided as follows
-  // { messages: Message[], users: User[], members: Member[] }
-
-  for (const user of response.users) {
-    // TODO: Cache users another way
-    const before = users.get(user);
-    const obj = before ? Object.assign(user, before) : user;
-    console.log("debug: cache", obj);
-    users.set(user._id, obj);
-  }
-
-  for (const message of response.messages.reverse()) {
-    messages.set(message._id, message);
-
-    // Wouldn't it be better if i use webcomponents for this
-    // no, it wasnt
-
-    switch (USE_NEW_RENDERER) {
-        case true:
-          const newRenderer = document.createElement("lit-message-renderer");
-          newRenderer.setAttribute("message-id", message._id);
-
-          MessageDisplay.appendChild(newRenderer);
-          break;
-        case false:
-          const renderer = document.createElement("message-renderer");
-          renderer.setAttribute("author", message.author);
-          renderer.setAttribute("message", message._id);
-
-          MessageDisplay.append(renderer);
-          break;
+  try {
+    const response = await fetch(
+      `https://api.revolt.chat/channels/${channel}/messages?limit=100&include_users=true`,
+      { headers: [["x-session-token", token]] },
+    ).then(async (res) => await res.json());
+  
+    // Response is divided as follows
+    // { messages: Message[], users: User[], members: Member[] }
+  
+    for await (const user of response.users) {
+      // TODO: Cache users another way
+      const before = users.get(user);
+      const obj = before ? Object.assign(user, before) : user;
+      console.log("debug: cache", obj);
+      users.set(user._id, obj);
     }
+  
+    for (const message of response.messages.reverse()) {
+      messages.set(message._id, message);
+  
+      // Wouldn't it be better if i use webcomponents for this
+      // no, it wasnt
+  
+      switch (USE_NEW_RENDERER) {
+          case true:
+            const newRenderer = document.createElement("lit-message-renderer");
+            newRenderer.setAttribute("message-id", message._id);
+  
+            MessageDisplay.appendChild(newRenderer);
+            break;
+          case false:
+            const renderer = document.createElement("message-renderer");
+            renderer.setAttribute("author", message.author);
+            renderer.setAttribute("message", message._id);
+  
+            MessageDisplay.append(renderer);
+            break;
+      }
+  
+    }
+  } catch (e) {
 
+  } finally {
+    cacheIndicator.setAttribute("hidden", "true");
   }
+  
 }
 
 serverNav.addEventListener("change", async (ev) => {
