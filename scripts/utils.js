@@ -57,16 +57,24 @@ function getRoleColour(message) {
   const member = membersInServer.find(m => m._id.user === author);
   
   if (!member.roles) return "var(--fg)";
-  
-  const firstRole = member.roles[0];
-  console.log(firstRole);
 
+  let highestRole;
   const rolesInServer = roles.get(channel.server);
-  const role = rolesInServer.find(r => r.id === firstRole);
 
-  if (!role) return "var(--fg)";
+  for (const id of member.roles) {
+    const role = rolesInServer.find(r => r.id === id);
 
-  return role.colour;
+    if (role.rank > highestRole?.rank && role.colour || !highestRole) {
+      highestRole = role;
+    } else {
+      return;
+    }
+  }
+  
+
+  if (!highestRole || highestRole && !highestRole.colour) return "var(--fg)";
+
+  return highestRole.colour;
 }
 
 export { getCookie, deleteAllCookies, urlBase64ToUint8Array, getRoleColour };
