@@ -17,9 +17,9 @@ class Indicator extends LitElement {
     this.variant = "info";
 
     this.classes = {
-      warning: !!this.variant,
-      error: !!this.variant,
-      info: !!this.variant,
+      warning: false,
+      error: false,
+      info: true,
       indicator: true
     };
   }
