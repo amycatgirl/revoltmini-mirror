@@ -310,9 +310,9 @@ header#top {
   grid-area: 1 / 1 / 2 / 2;
   background-color: var(--header-bg);
   display: flex;
-  justify-content: center;
   align-items: center;
   flex-flow: column nowrap;
+  padding: 0 0;
 }
 
 header#top select {
@@ -487,7 +487,8 @@ section#messagebox div.status span.dot:nth-child(3) {
 }
 
 #compose.grid button#send {
-  background: var(--accent)
+  background: var(--accent);
+  color: black;
 }
 
 #compose.grid label[for="attach"]:focus,
