@@ -52,7 +52,7 @@ class LitMessageRenderer extends LitElement {
         return html`
             ${this.getReplies()}
             <div class="author">
-                <coloured-text .colour=${this._roleColour} text=${this._author.username}></coloured-text>
+                <coloured-text .colour=${this._roleColour || "var(--fg)"} text=${this._author.username}></coloured-text>
             </div>
             <div class="content">
                 <markdown-renderer content=${this._message.content}></markdown-renderer>
@@ -123,7 +123,7 @@ class LitMessageRenderer extends LitElement {
                         const author = users.get(reply.author);
 
                         return html`<p>↱ ${author?.username ?? "Unknown"}:
-                            ${reply.content ? reply.content : reply.attachments > 0 ? `${reply.attachments.length} attachments` : "Empty Message"}`
+                            ${reply.content ? reply.content : reply.attachments > 0 ? `${reply.attachments.length} attachments` : "Empty Message"}</p>`
                     })}
                 </div>
             `
