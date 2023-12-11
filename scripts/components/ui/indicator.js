@@ -1,31 +1,30 @@
-import {html, css, LitElement} from "lit";
+import { html, css, LitElement } from "lit";
 import { classMap } from "lit/directives/class-map.js";
 
 class Indicator extends LitElement {
-    static properties = {
-        loaderType: {type: String, attribute: "spinner-type"},
-        variant: { type: String, attribute: "variant" },
-        hidden: { type: Boolean, attribute: "hidden"},
+  static properties = {
+    loaderType: { type: String, attribute: "spinner-type" },
+    variant: { type: String, attribute: "variant" },
+    hidden: { type: Boolean, attribute: "hidden", reflect: true},
 
-        classes: {}
-    }
+    classes: {}
+  }
 
-    constructor() {
-        super();
+  constructor() {
+    super();
 
-        this.loaderType = "dot";
-        this.variant = "info";
-        this.hidden = true;
+    this.loaderType = "dot";
+    this.variant = "info";
 
-        this.classes = {
-          warning: !!this.variant,
-          error: !!this.variant,
-          info: !!this.variant,
-          indicator: true
-        };
-    }
+    this.classes = {
+      warning: !!this.variant,
+      error: !!this.variant,
+      info: !!this.variant,
+      indicator: true
+    };
+  }
 
-    static styles = css`
+  static styles = css`
         .warning {
           background-color: #e4d500;
         }
@@ -49,8 +48,8 @@ class Indicator extends LitElement {
           background-color: var(--bg);
         }
 
-        :host div.hidden {
-          display: none;
+        :host([hidden="true"]) {
+          display: none !important;
         }
 
         :host {
@@ -113,8 +112,8 @@ class Indicator extends LitElement {
         }        
     `
 
-    render() {
-        return html`
+  render() {
+    return html`
           <div class=${classMap(this.classes)}>
             <div class="spinner">
                 ${this.renderLoader()}
@@ -124,54 +123,50 @@ class Indicator extends LitElement {
             </div>
           </div>
         `
-    }
+  }
 
-    renderLoader() {
-        switch (this.loaderType) {
-            default:
-            case "dot":
-                return html`
+  renderLoader() {
+    switch (this.loaderType) {
+      default:
+      case "dot":
+        return html`
                     <span class="dot"></span>
                     <span class="dot"></span>
                     <span class="dot"></span>
                 `;
-            case "ring":
-                return html`
+      case "ring":
+        return html`
                     <span class="ring"></span>
                 `;
-        }
     }
+  }
 
-    toggleVisibility() {
-        this._classes.hidden = !this._classes.hidden;
-    }
-
-    useVariant() {
-      switch (this.variant) {
-        default:
-        case "info": 
-          this.classes.info = true;
-          this.classes.warning = false;
-          this.classes.error = false;
-          break;
-        case "warning": 
-          this.classes.info = false;
-          this.classes.warning = true;
-          this.classes.error = false;
+  useVariant() {
+    switch (this.variant) {
+      default:
+      case "info":
+        this.classes.info = true;
+        this.classes.warning = false;
+        this.classes.error = false;
         break;
-        case "error": 
-          this.classes.info = false;
-          this.classes.warning = false;
-          this.classes.error = true;
+      case "warning":
+        this.classes.info = false;
+        this.classes.warning = true;
+        this.classes.error = false;
         break;
-      }
+      case "error":
+        this.classes.info = false;
+        this.classes.warning = false;
+        this.classes.error = true;
+        break;
     }
+  }
 
-    connectedCallback() {
-      super.connectedCallback();
+  connectedCallback() {
+    super.connectedCallback();
 
-      this.useVariant();
-    }
+    this.useVariant();
+  }
 }
 
 export { Indicator };

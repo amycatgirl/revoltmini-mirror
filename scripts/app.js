@@ -37,6 +37,8 @@ const logoutBtn = document.querySelector("button#logout");
 /** @type {HTMLButtonElement} */
 const requestBtn = document.querySelector("button#push");
 
+const typingIndicator = document.querySelector("snackbar-indicator#typing")
+
 
 // Register Service Worker if browser supports it
 navigator.serviceWorker?.register("sw.js");
@@ -188,14 +190,21 @@ async function startSocket() {
           if (currentChannelID !== response.id) break;
           if (typing.includes(response.user)) break;
           typing.push(response.user);
-          updateIndicatorValues(typing);
+          
+          typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`; 
+          typingIndicator.setAttribute("hidden", false);
+
           console.log(typing);
           break;
 
           case "ChannelStopTyping":
             if (currentChannelID !== response.id) break;
             typing = typing.filter((el) => el !== response.user);
-            updateIndicatorValues(typing)
+            if (typing.length === 0) {
+              typingIndicator.setAttribute("hidden", true);
+            } else {
+              typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`; 
+            }
         console.log(typing)
         break;
     }

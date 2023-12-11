@@ -121,17 +121,7 @@
       </div>
     </section>
     <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
-      <div id="typing" class="indicator hidden">
-        <div class="status">
-          <!-- Dot stuff goes here -->
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
-        <div id="names" class="names">
-          <span>3 users are typing</span>
-        </div>
-      </div>
+      <snackbar-indicator id="typing" hidden="true">No users typing</snackbar-indicator>
       <form id="compose" class="grid">
         <input type="file" accept="*" id="attach" />
         <label for="attach"><material-symbols name="attach_file_add" /></label>
