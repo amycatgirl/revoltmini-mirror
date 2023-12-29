@@ -64,10 +64,10 @@ function getRoleColour(message) {
   for (const id of member.roles) {
     const role = rolesInServer.find(r => r.id === id);
 
-    if (role.rank > highestRole?.rank && role.colour || !highestRole) {
+    // Lower Rank = Higher
+    // 1 > 2 > 3 > 4
+    if ((role.colour && (role.rank < highestRole?.rank)) || !highestRole) {
       highestRole = role;
-    } else {
-      return;
     }
   }
   
