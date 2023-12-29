@@ -57,6 +57,9 @@ class LitMessageRenderer extends LitElement {
             <div class="content">
                 <markdown-renderer content=${this._message.content}></markdown-renderer>
             </div>
+            <div class="embedlist">
+                ${this.getEmbededContent()}
+            </div>
         `
     }
 
@@ -129,6 +132,15 @@ class LitMessageRenderer extends LitElement {
             `
         } else {
             return nothing
+        }
+    }
+
+    getEmbededContent() {
+        if (this._message.embeds) {
+            return html`${this._message.embeds.map((embed) => {
+                // Embed is not used yet.
+                return html`<embeded-content .data=${embed}></embeded-content>`
+            })}`
         }
     }
 }
