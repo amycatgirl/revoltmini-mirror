@@ -10,13 +10,14 @@ import {
 } from "./cache.js";
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
-import {USE_NEW_RENDERER} from "./globals";
+import { USE_ALT_SERVERLIST, USE_NEW_RENDERER } from "./globals";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
 
 /** @type {HTMLSelectElement} */
 const serverNav = document.querySelector("select#server");
+const NEWserverNav = document.querySelector("aside.sidebar div.servers div.list");
 /** @type {HTMLSelectElement} */
 const channelNav = document.querySelector("select#channel");
 /** @type {HTMLTextAreaElement} */
@@ -153,7 +154,7 @@ async function startSocket() {
 
         console.log("debug/cache: Channels cached.", channels);
 
-        
+
 
         for await (const [index, user] of response.users.entries()) {
           cacheIndicator.innerText = `Populating cache, user ${index + 1} out of ${response.users.length}`;
@@ -184,41 +185,41 @@ async function startSocket() {
         if (strippedResponse.channel !== currentChannelID) break;
 
         switch (USE_NEW_RENDERER) {
-            case true:
-                const newRenderer = document.createElement("lit-message-renderer");
-                newRenderer.setAttribute("message-id", strippedResponse._id);
+          case true:
+            const newRenderer = document.createElement("lit-message-renderer");
+            newRenderer.setAttribute("message-id", strippedResponse._id);
 
-                MessageDisplay.appendChild(newRenderer);
-              break;
-            case false:
-              const renderer = document.createElement("message-renderer");
-              renderer.setAttribute("author", strippedResponse.author);
-              renderer.setAttribute("message", strippedResponse._id);
+            MessageDisplay.appendChild(newRenderer);
+            break;
+          case false:
+            const renderer = document.createElement("message-renderer");
+            renderer.setAttribute("author", strippedResponse.author);
+            renderer.setAttribute("message", strippedResponse._id);
 
-              MessageDisplay.appendChild(renderer);
-              break;
+            MessageDisplay.appendChild(renderer);
+            break;
         }
         break;
 
-        case "ChannelStartTyping":
-          if (currentChannelID !== response.id) break;
-          if (typing.includes(response.user)) break;
-          typing.push(response.user);
-          
-          typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`; 
-          typingIndicator.setAttribute("hidden", false);
+      case "ChannelStartTyping":
+        if (currentChannelID !== response.id) break;
+        if (typing.includes(response.user)) break;
+        typing.push(response.user);
 
-          console.log(typing);
-          break;
+        typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
+        typingIndicator.setAttribute("hidden", false);
 
-          case "ChannelStopTyping":
-            if (currentChannelID !== response.id) break;
-            typing = typing.filter((el) => el !== response.user);
-            if (typing.length === 0) {
-              typingIndicator.setAttribute("hidden", true);
-            } else {
-              typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`; 
-            }
+        console.log(typing);
+        break;
+
+      case "ChannelStopTyping":
+        if (currentChannelID !== response.id) break;
+        typing = typing.filter((el) => el !== response.user);
+        if (typing.length === 0) {
+          typingIndicator.setAttribute("hidden", true);
+        } else {
+          typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
+        }
         console.log(typing)
         break;
     }
@@ -270,10 +271,10 @@ async function attemptReconnection(tries = 0) {
     setTimeout(async () => {
       await attemptReconnection(newTry);
     }, delay);
-    
+
   }
-  
-  
+
+
 }
 
 /**
@@ -281,10 +282,10 @@ async function attemptReconnection(tries = 0) {
 */
 function requestPush() {
   Notification.requestPermission().then(async (state) => {
-     switch(state) {
-       case "granted":
+    switch (state) {
+      case "granted":
         const reg = await navigator.serviceWorker?.getRegistration();
-        
+
         // This means that the browser probably doesn't support serviceWorkers.
         if (!reg) return;
 
@@ -305,7 +306,7 @@ function requestPush() {
             headers: [["x-session-token", token]],
           });
         }
-        
+
         break;
       default:
         break;
@@ -389,26 +390,49 @@ function loadServers() {
   cacheIndicator.setAttribute("hidden", "false");
   cacheIndicator.innerText = "Loading servers...";
 
-  const defaultOption = document.createElement("option");
-  defaultOption.value = "DEFAULT";
-  defaultOption.innerText = "Select a server";
 
-  const elements = [defaultOption];
+  if (USE_ALT_SERVERLIST) {
+    console.warn("Heya! You are using an experimental option!");
+    console.warn("Things might break beyond repair, so please, if you find an issue, report it.");
+    console.warn("- Amy")
 
-  // Load from cache
-  for (const [id, server] of servers.entries()) {
-    const option = document.createElement("option");
+    const elements = []
 
-    option.value = id;
-    option.innerText = server.name;
+    for (const [id, server] of servers.entries()) {
+      const serverIcon = document.createElement("server-icon");
 
-    elements.push(option);
+      serverIcon.id = id;
+      serverIcon.setAttribute("server-name", server.name);
+
+
+      elements.push(serverIcon);
+    }
+
+    NEWserverNav.replaceChildren(...elements);
+    cacheIndicator.setAttribute("hidden", "true");
+  } else {
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "DEFAULT";
+    defaultOption.innerText = "Select a server";
+
+    const elements = [defaultOption];
+
+    // Load from cache
+    for (const [id, server] of servers.entries()) {
+      const option = document.createElement("option");
+
+      option.value = id;
+      option.innerText = server.name;
+
+
+      elements.push(option);
+    }
+
+    console.log(elements);
+
+    serverNav.replaceChildren(...elements);
+    cacheIndicator.setAttribute("hidden", "true");
   }
-
-  console.log(elements);  
-
-  serverNav.replaceChildren(...elements);
-  cacheIndicator.setAttribute("hidden", "true");
 }
 
 /**
@@ -426,27 +450,27 @@ async function cacheMembersFromServer(server) {
         headers: [["x-session-token", token]]
       }
     )
-    .then(async res => await res.json());
-    
+      .then(async res => await res.json());
+
     if (response.members && response.users) {
       const oldMemberCache = members.get(server);
       if (oldMemberCache) return;
-      
+
       const memberArr = [];
       members.set(server, []);
 
       const memberCache = members.get(server);
-      for (const member of response.members) {        
+      for (const member of response.members) {
         // Don't add the same member to the cache, thats dumb
         if (memberCache.find(m => m._id.user === member._id.user)) continue;
-        
+
         memberArr.push(member);
-        
+
         console.log("debug: cache values", members.values());
       }
 
       members.set(server, memberArr);
-      
+
       console.log("debug: done caching members", members);
     }
     window.membersDebug = members;
@@ -460,7 +484,7 @@ async function cacheMembersFromServer(server) {
 async function cacheRolesFromServer(server) {
   const info =
     await fetch(
-      `https://api.revolt.chat/servers/${server}`, {headers: [["x-session-token", token]]}
+      `https://api.revolt.chat/servers/${server}`, { headers: [["x-session-token", token]] }
     ).then(async (res) => await res.json());
 
   if (!info) throw "No information, somehow";
@@ -480,13 +504,13 @@ async function cacheRolesFromServer(server) {
     const foundRole = currentServerRoles.find(r => r.name === value.name);
 
     if (foundRole) continue;
-    
-    currentServerRoles.push({ id: key, ...value});
+
+    currentServerRoles.push({ id: key, ...value });
   }
 
   roles.set(server, [...currentServerRoles])
 
-  console.log("debug: cached roles:", roles.get(server));  
+  console.log("debug: cached roles:", roles.get(server));
 }
 
 async function loadChannels(server) {
@@ -503,36 +527,36 @@ async function loadChannels(server) {
     cacheIndicator.setAttribute("hidden", "false");
     cacheIndicator.innerText = "Loading channels...";
 
-  const info =
-    servers.get(server) ||
-    (await fetch(
-      `https://api.revolt.chat/servers/${server}?include_channels=true`, { header: [["x-session-token", token]]},
-    ).then(async (res) => await res.json()));
+    const info =
+      servers.get(server) ||
+      (await fetch(
+        `https://api.revolt.chat/servers/${server}?include_channels=true`, { header: [["x-session-token", token]] },
+      ).then(async (res) => await res.json()));
 
-  if (!info) throw "No information, somehow";
+    if (!info) throw "No information, somehow";
 
-  console.log(info.channels);  
+    console.log(info.channels);
 
-  for await (const id of info.channels) {
-    try {
-      const channel =
-        channels.get(id) ||
-        (await fetch(`https://api.revolt.chat/channels/${id}`, {
-          headers: [["x-session-token", token]],
-        })
-          .then(async (res) => await res.json())
-          .then((res) => {
-            channels.set(res._id, res);
-          }));
+    for await (const id of info.channels) {
+      try {
+        const channel =
+          channels.get(id) ||
+          (await fetch(`https://api.revolt.chat/channels/${id}`, {
+            headers: [["x-session-token", token]],
+          })
+            .then(async (res) => await res.json())
+            .then((res) => {
+              channels.set(res._id, res);
+            }));
 
-      const option = document.createElement("option");
+        const option = document.createElement("option");
 
-      option.value = id;
-      option.innerText = `#${channel.name || "unknown"}`;
+        option.value = id;
+        option.innerText = `#${channel.name || "unknown"}`;
 
-      channelNav.append(option);
-    } catch {}
-  }
+        channelNav.append(option);
+      } catch { }
+    }
 
   } catch {
 
@@ -540,7 +564,7 @@ async function loadChannels(server) {
     cacheIndicator.setAttribute("hidden", "true");
   }
 
-  
+
 
   cacheIndicator.setAttribute("hidden", "true");
 }
@@ -559,10 +583,10 @@ async function loadMessagesFromChannel(channel) {
       `https://api.revolt.chat/channels/${channel}/messages?limit=100&include_users=true`,
       { headers: [["x-session-token", token]] },
     ).then(async (res) => await res.json());
-  
+
     // Response is divided as follows
     // { messages: Message[], users: User[], members: Member[] }
-  
+
     for await (const user of response.users) {
       // TODO: Cache users another way
       const before = users.get(user);
@@ -570,36 +594,36 @@ async function loadMessagesFromChannel(channel) {
       console.log("debug: cache", obj);
       users.set(user._id, obj);
     }
-  
+
     for (const message of response.messages.reverse()) {
       messages.set(message._id, message);
-  
+
       // Wouldn't it be better if i use webcomponents for this
       // no, it wasnt
-  
+
       switch (USE_NEW_RENDERER) {
-          case true:
-            const newRenderer = document.createElement("lit-message-renderer");
-            newRenderer.setAttribute("message-id", message._id);
-  
-            MessageDisplay.appendChild(newRenderer);
-            break;
-          case false:
-            const renderer = document.createElement("message-renderer");
-            renderer.setAttribute("author", message.author);
-            renderer.setAttribute("message", message._id);
-  
-            MessageDisplay.append(renderer);
-            break;
+        case true:
+          const newRenderer = document.createElement("lit-message-renderer");
+          newRenderer.setAttribute("message-id", message._id);
+
+          MessageDisplay.appendChild(newRenderer);
+          break;
+        case false:
+          const renderer = document.createElement("message-renderer");
+          renderer.setAttribute("author", message.author);
+          renderer.setAttribute("message", message._id);
+
+          MessageDisplay.append(renderer);
+          break;
       }
-  
+
     }
   } catch (e) {
 
   } finally {
     cacheIndicator.setAttribute("hidden", "true");
   }
-  
+
 }
 
 serverNav.addEventListener("change", async (ev) => {
@@ -610,7 +634,7 @@ serverNav.addEventListener("change", async (ev) => {
     channelNav.replaceChildren();
     return;
   };
-    
+
   await cacheMembersFromServer(ev.target.value);
   await cacheRolesFromServer(ev.target.value);
   await loadChannels(ev.target.value);
@@ -633,7 +657,7 @@ messageForm.addEventListener("submit", async (ev) => {
   toSend = messageBox.value;
   // dont you dare reload the page
   ev.preventDefault();
-  
+
   sendBTN.disabled = true;
 
   try {
@@ -645,9 +669,9 @@ messageForm.addEventListener("submit", async (ev) => {
       attachments && attachments.length > 0
         ? { content: toSend, attachments, replies }
         : {
-            content: toSend,
-            replies,
-          };
+          content: toSend,
+          replies,
+        };
 
     await fetch(`https://api.revolt.chat/channels/${currentChannelID}/messages`, {
       method: "POST",

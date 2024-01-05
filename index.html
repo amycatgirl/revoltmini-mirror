@@ -98,59 +98,90 @@
     </section>
   </main>
   <main id="app" class="hidden">
-    <header id="top" class="bar flex stick anchor-top anchor-left">
-      <nav>
-        <form id="navigation">
-          <select name="DEFAULT" id="server">
-            <option value="DEFAULT">Select a server</option>
-          </select>
-          <select id="channel">
-          </select>
-        </form>
-      </nav>
-      <snackbar-indicator
-        id="cache"
-        spinner-type="ring"
-        hidden="true">
-        Populating Cache...
-      </snackbar-indicator>
-      <snackbar-indicator
-        id="reconnecting"
-        variant="warning"
-        spinner-type="dot"
-        hidden="true">
-        Reconnecting...
-      </snackbar-indicator>
-      <snackbar-indicator
-        id="lostconnection"
-        variant="error"
-        spinner-type="none"
-        hidden="true">
-        Lost connection to Revolt.
-      </snackbar-indicator>
-    </header>
-    <section id="middle">
-      <div class="intro">
-        <h1>Welcome to RevoltMini!</h1>
-        <p>Use the dropdowns to navigate across servers</p>
-        <p>Push notifications are available for mobile/desktop devices, but it needs your permission to enable them.
-          Click the button below to allow RevoltMini to send notifications</p>
-        <button id="push"><material-symbols name="notifications"></material-symbols> Request Notification
-          Permission</button>
-        <p>To log out, use the button below</p>
-        <button id="logout"><material-symbols optical-size="9" name="logout"></material-symbols> Log out from
-          revolt</button>
-      </div>
-    </section>
-    <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
-      <snackbar-indicator id="typing" hidden="true">No users typing</snackbar-indicator>
-      <form id="compose" class="grid">
-        <input type="file" accept="*" id="attach" />
-        <label for="attach"><material-symbols name="attach_file_add" /></label>
-        <textarea type="text" id="content" placeholder="Send message"></textarea>
-        <button id="send"><material-symbols name="send" /></button>
-      </form>
-    </section>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="servers">
+          <server-icon self server-name="amycatgirl"></server-icon>
+          <hr class="divider" />
+          <div class="list">
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+            <server-icon></server-icon>
+          </div>
+        </div>
+        <div class="channels">
+          <header>
+            <h1>Home</h1>
+          </header>
+          <ul class="options">
+            <li><material-symbols name="group"></material-symbols>
+              <p>Friends</p>
+            </li>
+            <li><material-symbols name="group"></material-symbols>
+              <p>Friends</p>
+            </li>
+            <li><material-symbols name="group"></material-symbols>
+              <p>Friends</p>
+            </li>
+            <li><material-symbols name="group"></material-symbols>
+              <p>Friends</p>
+            </li>
+          </ul>
+        </div>
+      </aside>
+      <section class="view">
+        <header id="top" class="bar flex stick anchor-top anchor-left">
+          <nav>
+            <form id="navigation">
+              <select name="DEFAULT" id="server">
+                <option value="DEFAULT">Select a server</option>
+              </select>
+              <select id="channel">
+              </select>
+            </form>
+          </nav>
+          <snackbar-indicator id="cache" spinner-type="ring" hidden="true">
+            Populating Cache...
+          </snackbar-indicator>
+          <snackbar-indicator id="reconnecting" variant="warning" spinner-type="dot" hidden="true">
+            Reconnecting...
+          </snackbar-indicator>
+          <snackbar-indicator id="lostconnection" variant="error" spinner-type="none" hidden="true">
+            Lost connection to Revolt.
+          </snackbar-indicator>
+        </header>
+        <section id="middle">
+          <div class="intro">
+            <h1>Welcome to RevoltMini!</h1>
+            <p>Use the dropdowns to navigate across servers</p>
+            <p>Push notifications are available for mobile/desktop devices, but it needs your permission to enable them.
+              Click the button below to allow RevoltMini to send notifications</p>
+            <button id="push"><material-symbols name="notifications"></material-symbols> Request Notification
+              Permission</button>
+            <p>To log out, use the button below</p>
+            <button id="logout"><material-symbols optical-size="9" name="logout"></material-symbols> Log out from
+              revolt</button>
+          </div>
+        </section>
+        <section id="messagebox" class="bar flex stick anchor-bottom anchor-left">
+          <snackbar-indicator id="typing" hidden="true">No users typing</snackbar-indicator>
+          <form id="compose" class="grid">
+            <input type="file" accept="*" id="attach" />
+            <label for="attach"><material-symbols name="attach_file_add" /></label>
+            <textarea type="text" id="content" placeholder="Send message"></textarea>
+            <button id="send"><material-symbols name="send" /></button>
+          </form>
+        </section>
+      </section>
+    </div>
   </main>
 
   <template id="intro">

@@ -17,6 +17,7 @@ class ColouredText extends LitElement {
         this._styles = {
             background: unsafeCSS(this.colour),
             "background-clip": "text",
+            "-webkit-background-clip": "text",
             "-moz-text-fill-color": "transparent",
             "-webkit-text-fill-color": "transparent",
             "font-weight": 600
