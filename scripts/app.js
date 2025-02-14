@@ -396,19 +396,14 @@ function loadServers() {
     console.warn("Things might break beyond repair, so please, if you find an issue, report it.");
     console.warn("- Amy")
 
-    const elements = []
-
-    for (const [id, server] of servers.entries()) {
-      const serverIcon = document.createElement("server-icon");
-
-      serverIcon.id = id;
-      serverIcon.setAttribute("server-name", server.name);
-
-
-      elements.push(serverIcon);
-    }
-
-    NEWserverNav.replaceChildren(...elements);
+    const newServerList = document.querySelector("server-list");
+    newServerList.dispatchEvent(new CustomEvent(
+      "recieveServers",
+      {
+        composed: true,
+        detail: servers.entries()
+      }
+    ))
     cacheIndicator.setAttribute("hidden", "true");
   } else {
     const defaultOption = document.createElement("option");

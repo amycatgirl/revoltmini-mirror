@@ -8,6 +8,7 @@ import { Markdown } from "./messaging/Markdown";
 import { Indicator } from "./ui/indicator";
 import { BaseEmbed } from "./messaging/embed/baseEmbed";
 import { ServerIcon } from "./ui/serverIcon";
+import { ServerList } from "./ServerList";
 
 customElements.define("message-renderer", Message);
 customElements.define("markdown-renderer", Markdown);
@@ -18,4 +19,5 @@ customElements.define("attachment-renderer", Attachments);
 customElements.define("material-symbols", MDSymbols);
 customElements.define("coloured-text", ColouredText);
 customElements.define("server-icon", ServerIcon);
+customElements.define("server-list", ServerList);
 customElements.define("custom-modal", Modal, { extends: "dialog" });

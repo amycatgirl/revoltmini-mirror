@@ -13,7 +13,7 @@ class ServerIcon extends LitElement {
     div {
       display: flex;
       font-size: 15pt;
-      background-color: gray;
+      background-color: var(--header-bg);
       border-radius: 5px;
       align-items: center;
       justify-content: center;
@@ -28,12 +28,28 @@ class ServerIcon extends LitElement {
       font-weight: 700;
       flex-shrink: 0;
     }
+
+    :host([loading]) div {
+        background-image: linear-gradient(to right, gray, gray, lightgray, lightgray, gray, gray);
+        background-size: calc(100% * 10);
+
+        animation: skeleton-anim 2s cubic-bezier(0.83, 0, 0.17, 1) infinite;
+    }
+
+    @keyframes skeleton-anim {
+      0% {
+        background-position: left;
+      }
+      100% {
+        background-position: right;
+      }
+    }
   `
 
   constructor() {
     super();
 
-    this.fullName = "Server Name";
+    this.fullName = "";
     this.isSelf = false;
   }
 
