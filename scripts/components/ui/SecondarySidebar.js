@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { token } from "../../index.js";
-
+import { messages as MSGCache } from "../../cache.js";
 /**
  * Primitive type for sidebar entries
  * @typedef {Object} SidebarEntry
@@ -63,6 +63,24 @@ export class SecondarySidebar extends LitElement {
   constructor() {
     super();
 
+    this.addEventListener("navHome", async () => {
+      this.setSidebarTitle("Home");
+      this.generateOptions([
+        {
+          name: "Log Out",
+          icon: "logout",
+          id: "logout",
+          callback: () => console.log("TODO)) Perform logout")
+        }
+      ])
+
+      this._view.dispatchEvent(new CustomEvent("navigate", {
+        detail: {
+          route: "internal/home"
+        }
+      }))
+    })
+
     this.addEventListener("sync", async ev => {
       console.log(ev.detail);
       const channels = await ev.currentTarget.accuireChannels(ev.detail.id)
@@ -71,8 +89,28 @@ export class SecondarySidebar extends LitElement {
         return {
           name: ch.name,
           icon: "tag",
-          id: ch.id,
-          callback: () => console.log(`NAVIGATE: ${ch.name} (${ch.id})`)
+          id: ch._id,
+          callback: async () => {
+            const view = this._view;
+            const { messages } = await fetch(
+              `https://api.revolt.chat/channels/${ch._id}/messages?limit=30&include_users=true`,
+              { headers: [["x-session-token", token]] },
+            ).then(async (res) => await res.json());
+
+            messages.forEach((e) => MSGCache.set(e._id, e));
+
+            view.dispatchEvent(new CustomEvent("navigate", {
+              detail: {
+                route: "app/channel",
+                args: {
+                  messages,
+                  id: ch._id
+                }
+              },
+              composed: true
+            }))
+            console.log(`debug/router: NAVIGATE ${ch.name} (${ch.id})`)
+          }
         }
       }))
 
@@ -92,6 +130,10 @@ export class SecondarySidebar extends LitElement {
   static properties = {
     _title: { state: true },
     options: {},
+  }
+
+  get _view() {
+    return document.querySelector("message-view")
   }
 
   /**

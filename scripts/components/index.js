@@ -10,6 +10,7 @@ import { BaseEmbed } from "./messaging/embed/baseEmbed";
 import { ServerIcon } from "./ui/serverIcon";
 import { ServerList } from "./ServerList";
 import { SecondarySidebar } from "./ui/SecondarySidebar";
+import { MessageView } from "./ui/MessageView";
 
 customElements.define("message-renderer", Message);
 customElements.define("markdown-renderer", Markdown);
@@ -22,4 +23,5 @@ customElements.define("coloured-text", ColouredText);
 customElements.define("server-icon", ServerIcon);
 customElements.define("server-list", ServerList);
 customElements.define("secondary-list", SecondarySidebar);
+customElements.define("message-view", MessageView);
 customElements.define("custom-modal", Modal, { extends: "dialog" });

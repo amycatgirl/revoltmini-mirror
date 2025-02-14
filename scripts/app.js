@@ -67,6 +67,10 @@ let toBeUploaded;
 /** @type {string[]} */
 let attachments;
 
+export function changeChannel(id) {
+  currentChannelID = id
+}
+
 function togglePage() {
   app.classList.toggle("hidden");
   loginPage.classList.toggle("hidden");
@@ -180,9 +184,16 @@ async function startSocket() {
       case "Message":
         // Ugly ass workarround to cache the message
         const { type, ...strippedResponse } = response;
+        const view = document.querySelector("message-view");
         messages.set(strippedResponse._id, strippedResponse);
 
-        if (strippedResponse.channel !== currentChannelID) break;
+        if (strippedResponse.channel !== view.getAttribute("chid")) break;
+        view.dispatchEvent(new CustomEvent("message", {
+          detail: {
+            msg: strippedResponse
+          }
+        }))
+        break;
 
         switch (USE_NEW_RENDERER) {
           case true:
@@ -648,8 +659,6 @@ messageBox.addEventListener("keydown", (ev) => {
   toSend = ev.target.value;
 });
 
-requestBtn.addEventListener("click", async () => await requestPush());
-logoutBtn.addEventListener("click", async () => await closeConnectionAndLogOut());
 
 function setReplies(v) {
   replies = v;

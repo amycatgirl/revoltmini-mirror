@@ -57,12 +57,17 @@ class ServerIcon extends LitElement {
     this.addEventListener("click", () => {
       const sd = document.getElementById("info");
 
-      sd.dispatchEvent(new CustomEvent("sync", {
-        detail: {
-          name: this.fullName,
-          id: this.server_id
-        }
-      }))
+      if (this.isSelf) {
+        sd.dispatchEvent(new CustomEvent("navHome"))
+      } else {
+        sd.dispatchEvent(new CustomEvent("sync", {
+          detail: {
+            name: this.fullName,
+            id: this.server_id
+          }
+        }))
+
+      }
     })
   }
 
