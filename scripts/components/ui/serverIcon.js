@@ -6,7 +6,8 @@ import { LitElement, html, css } from "lit";
 class ServerIcon extends LitElement {
   static properties = {
     fullName: { type: String, attribute: "server-name" },
-    isSelf: { type: Boolean, reflect: true, attribute: "self" }
+    isSelf: { type: Boolean, reflect: true, attribute: "self" },
+    server_id: { type: String, reflect: true, attribute: "server-id" }
   }
 
   static styles = css`
@@ -51,6 +52,18 @@ class ServerIcon extends LitElement {
 
     this.fullName = "";
     this.isSelf = false;
+    this.server_id = "";
+
+    this.addEventListener("click", () => {
+      const sd = document.getElementById("info");
+
+      sd.dispatchEvent(new CustomEvent("sync", {
+        detail: {
+          name: this.fullName,
+          id: this.server_id
+        }
+      }))
+    })
   }
 
   render() {
@@ -67,7 +80,7 @@ class ServerIcon extends LitElement {
       .map(st => st[0])
       .filter(el => typeof el !== "undefined")
       .join("")
-      .substring(0, 3)
+      .substring(0, 2)
   }
 }
 

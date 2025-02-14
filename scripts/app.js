@@ -508,61 +508,6 @@ async function cacheRolesFromServer(server) {
   console.log("debug: cached roles:", roles.get(server));
 }
 
-async function loadChannels(server) {
-  channelNav.replaceChildren();
-
-  const defaultOption = document.createElement("option");
-
-  defaultOption.value = "DEFAULT";
-  defaultOption.innerText = "Select a channel";
-
-  channelNav.add(defaultOption);
-
-  try {
-    cacheIndicator.setAttribute("hidden", "false");
-    cacheIndicator.innerText = "Loading channels...";
-
-    const info =
-      servers.get(server) ||
-      (await fetch(
-        `https://api.revolt.chat/servers/${server}?include_channels=true`, { header: [["x-session-token", token]] },
-      ).then(async (res) => await res.json()));
-
-    if (!info) throw "No information, somehow";
-
-    console.log(info.channels);
-
-    for await (const id of info.channels) {
-      try {
-        const channel =
-          channels.get(id) ||
-          (await fetch(`https://api.revolt.chat/channels/${id}`, {
-            headers: [["x-session-token", token]],
-          })
-            .then(async (res) => await res.json())
-            .then((res) => {
-              channels.set(res._id, res);
-            }));
-
-        const option = document.createElement("option");
-
-        option.value = id;
-        option.innerText = `#${channel.name || "unknown"}`;
-
-        channelNav.append(option);
-      } catch { }
-    }
-
-  } catch {
-
-  } finally {
-    cacheIndicator.setAttribute("hidden", "true");
-  }
-
-
-
-  cacheIndicator.setAttribute("hidden", "true");
-}
 
 /**
   @param {string} channel - Channel ID

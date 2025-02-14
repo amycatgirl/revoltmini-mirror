@@ -31,7 +31,7 @@ export class ServerList extends LitElement {
     for (const [id, server] of entries) {
       const serverIcon = document.createElement("server-icon");
 
-      serverIcon.id = id;
+      serverIcon.setAttribute("server-id", id);
       serverIcon.setAttribute("server-name", server.name);
       elements.push(serverIcon);
     }
