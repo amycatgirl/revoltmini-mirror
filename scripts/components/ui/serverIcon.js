@@ -30,7 +30,7 @@ class ServerIcon extends LitElement {
     }
 
     :host([loading]) div {
-        background-image: linear-gradient(to right, gray, gray, lightgray, lightgray, gray, gray);
+        background-image: linear-gradient(to right, var(--header-bg), var(--header-bg), color-mix(in lab, var(--header-bg), white 50%), color-mix(in lab, var(--header-bg), white 50%), var(--header-bg), var(--header-bg));
         background-size: calc(100% * 10);
 
         animation: skeleton-anim 2s cubic-bezier(0.83, 0, 0.17, 1) infinite;
