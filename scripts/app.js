@@ -11,6 +11,7 @@ import {
 import { storage, token } from "./index.js";
 import { deleteAllCookies, urlBase64ToUint8Array } from "./utils.js";
 import { USE_ALT_SERVERLIST, USE_NEW_RENDERER } from "./globals";
+import { LiveSocket } from "./live/websocket.js";
 
 const app = document.querySelector("main#app");
 const loginPage = document.querySelector("main#login");
@@ -60,8 +61,6 @@ let currentChannelID = "";
 let replies = [];
 /** @type {string} */
 let toSend = "";
-/** @type {WebSocket} */
-let socket;
 /** @type {FileList | File[]} */
 let toBeUploaded;
 /** @type {string[]} */
@@ -113,141 +112,90 @@ async function GetVapid() {
 }
 
 async function startSocket() {
-  socket = new WebSocket((await GetWSLocation()) + "?format=json");
-  isReconnectionNeeded = true;
+  const socket = new LiveSocket(token);
+  socket.listen("Ready", async (value) => {
+    console.log("debug: Got ready event from API");
+    console.log(`debug: Hi!`);
 
-  socket.onopen = () => {
-    console.log("debug: Opened connection with Bonfire");
-    console.log("debug: attempting authentication");
-    socket.send(JSON.stringify({ type: "Authenticate", token }));
+    // Add everything into cache :)
+    cacheIndicator.setAttribute("hidden", "false");
+    cacheIndicator.innerText = "Populating server cache...";
 
-    console.log("debug: registering interval to about disconnection");
-    interval = setInterval(() => {
-      socket.send(JSON.stringify({ type: "Ping", data: Date.now() }));
-    }, 20000);
-  };
-
-  socket.onmessage = async (ev) => {
-    const response = JSON.parse(ev.data);
-
-    switch (response.type) {
-      case "Authenticated":
-        console.log("debug: Logged in!");
-        break;
-      case "Ready":
-        console.log("debug: Got ready event from API");
-        console.log(`debug: Hi!`);
-
-        // Add everything into cache :)
-        cacheIndicator.setAttribute("hidden", "false");
-        cacheIndicator.innerText = "Populating server cache...";
-
-        for await (const [index, server] of response.servers.entries()) {
-          cacheIndicator.innerText = `Populating cache, server ${index + 1} out of ${response.servers.length}`;
-          servers.set(server._id, server);
-        }
-
-        console.log("debug/cache: Servers cached.", servers);
-
-        cacheIndicator.innerText = "Populating channel cache...";
-
-        for await (const [index, channel] of response.channels.entries()) {
-          cacheIndicator.innerText = `Populating cache, channel ${index + 1} out of ${response.channels.length}`;
-          channels.set(channel._id, channel);
-        }
-
-        console.log("debug/cache: Channels cached.", channels);
-
-
-
-        for await (const [index, user] of response.users.entries()) {
-          cacheIndicator.innerText = `Populating cache, user ${index + 1} out of ${response.users.length}`;
-          users.set(user._id, user);
-        }
-
-        console.log("debug/cache: Users cached.", users);
-
-        cacheIndicator.innerText = "Populating emoji cache...";
-
-        for (const emoji of response.emojis) {
-          emojis.set(emoji._id, emoji);
-        }
-
-        cacheIndicator.setAttribute("hidden", "true");
-
-        console.log("debug/cache: Emojis cached", emojis);
-        console.log("debug/cache: Everything is in cache!");
-
-        console.log("debug: Loading servers into navigation");
-        loadServers();
-        break;
-      case "Message":
-        // Ugly ass workarround to cache the message
-        const { type, ...strippedResponse } = response;
-        const view = document.querySelector("message-view");
-        messages.set(strippedResponse._id, strippedResponse);
-
-        if (strippedResponse.channel !== view.getAttribute("chid")) break;
-        view.dispatchEvent(new CustomEvent("message", {
-          detail: {
-            msg: strippedResponse
-          }
-        }))
-        break;
-
-        switch (USE_NEW_RENDERER) {
-          case true:
-            const newRenderer = document.createElement("lit-message-renderer");
-            newRenderer.setAttribute("message-id", strippedResponse._id);
-
-            MessageDisplay.appendChild(newRenderer);
-            break;
-          case false:
-            const renderer = document.createElement("message-renderer");
-            renderer.setAttribute("author", strippedResponse.author);
-            renderer.setAttribute("message", strippedResponse._id);
-
-            MessageDisplay.appendChild(renderer);
-            break;
-        }
-        break;
-
-      case "ChannelStartTyping":
-        if (currentChannelID !== response.id) break;
-        if (typing.includes(response.user)) break;
-        typing.push(response.user);
-
-        typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
-        typingIndicator.setAttribute("hidden", false);
-
-        console.log(typing);
-        break;
-
-      case "ChannelStopTyping":
-        if (currentChannelID !== response.id) break;
-        typing = typing.filter((el) => el !== response.user);
-        if (typing.length === 0) {
-          typingIndicator.setAttribute("hidden", true);
-        } else {
-          typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
-        }
-        console.log(typing)
-        break;
+    for await (const [index, server] of value.servers.entries()) {
+      cacheIndicator.innerText = `Populating cache, server ${index + 1} out of ${value.servers.length}`;
+      servers.set(server._id, server);
     }
-  };
 
-  socket.onerror = () => {
-    console.error(
-      "debug: Something went wrong, we don't know what went wrong but something surely went wrong",
-    );
-  };
+    console.log("debug/cache: Servers cached.", servers);
 
-  socket.onclose = () => {
-    isReconnectionNeeded = attemptReconnection();
-    if (!isReconnectionNeeded) {
-      console.error("debug/ws: failed to connect");
+    cacheIndicator.innerText = "Populating channel cache...";
+
+    for await (const [index, channel] of value.channels.entries()) {
+      cacheIndicator.innerText = `Populating cache, channel ${index + 1} out of ${value.channels.length}`;
+      channels.set(channel._id, channel);
     }
-  };
+
+    console.log("debug/cache: Channels cached.", channels);
+
+
+
+    for await (const [index, user] of value.users.entries()) {
+      cacheIndicator.innerText = `Populating cache, user ${index + 1} out of ${value.users.length}`;
+      users.set(user._id, user);
+    }
+
+    console.log("debug/cache: Users cached.", users);
+
+    cacheIndicator.innerText = "Populating emoji cache...";
+
+    for (const emoji of value.emojis) {
+      emojis.set(emoji._id, emoji);
+    }
+
+    cacheIndicator.setAttribute("hidden", "true");
+
+    console.log("debug/cache: Emojis cached", emojis);
+    console.log("debug/cache: Everything is in cache!");
+
+    console.log("debug: Loading servers into navigation");
+    loadServers();
+  })
+
+  socket.listen("Message", (msg) => {
+    console.log("livesocket: New message:", msg)
+    const view = document.querySelector("message-view");
+    messages.set(msg._id, msg);
+
+    if (msg.channel !== view.getAttribute("chid")) return;
+    view.dispatchEvent(new CustomEvent("message", {
+      detail: {
+        msg: msg
+      }
+    }))
+  })
+  socket.listen("ChannelStartTyping", (v) => {
+    if (currentChannelID !== v.id || typing.includes(v.user)) return;
+    typing.push(v.user);
+
+    typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
+    typingIndicator.setAttribute("hidden", false);
+
+    console.log(typing);
+
+  })
+
+  socket.listen("ChannelStopTyping", (v) => {
+    if (currentChannelID !== v.id) return;
+    typing = typing.filter((el) => el !== v.user);
+    if (typing.length === 0) {
+      typingIndicator.setAttribute("hidden", true);
+    } else {
+      typingIndicator.innerText = typing.length > 1 ? `${typing.length} users are typing` : `${typing.length} user is typing`;
+    }
+    console.log(typing)
+  })
+
+  socket.start()
 }
 
 function stopPinging() {
