@@ -12,6 +12,9 @@ import { ServerList } from "./ServerList";
 import { SecondarySidebar } from "./ui/SecondarySidebar";
 import { MessageView } from "./ui/MessageView";
 
+// Contexts
+import { AppStateProvider } from "./contexts/AppState";
+
 customElements.define("message-renderer", Message);
 customElements.define("markdown-renderer", Markdown);
 customElements.define("embeded-content", BaseEmbed);
@@ -25,3 +28,4 @@ customElements.define("server-list", ServerList);
 customElements.define("secondary-list", SecondarySidebar);
 customElements.define("message-view", MessageView);
 customElements.define("custom-modal", Modal, { extends: "dialog" });
+customElements.define("app-provider", AppStateProvider);

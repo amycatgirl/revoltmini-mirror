@@ -1,5 +1,7 @@
+import { ContextProvider } from "@lit/context";
 import { LitElement, html, css } from "lit";
 import { repeat } from "lit/directives/repeat.js";
+import { AppContext } from "../contexts/AppState";
 
 const IntroScreen = html`
   <div class="intro">
@@ -51,7 +53,6 @@ export class MessageView extends LitElement {
     })
   }
   static properties = {
-    current_channel: { type: String, reflect: true, attribute: "chid" },
     _route: { type: String, state: true },
     _messages: { type: Array, hasChanged: (_a, _b) => true }
   }

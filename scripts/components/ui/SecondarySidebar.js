@@ -1,6 +1,8 @@
 import { LitElement, html, css } from "lit";
 import { token } from "../../index.js";
 import { messages as MSGCache } from "../../cache.js";
+import { ContextConsumer } from "@lit/context";
+import { AppContext, AppStateProvider } from "../contexts/AppState.js";
 /**
  * Primitive type for sidebar entries
  * @typedef {Object} SidebarEntry
@@ -60,6 +62,8 @@ export class SecondarySidebar extends LitElement {
 		}
 	`;
 
+  #appState = new ContextConsumer(this, { context: AppContext, subscribe: true });
+
   constructor() {
     super();
 
@@ -92,6 +96,7 @@ export class SecondarySidebar extends LitElement {
           id: ch._id,
           callback: async () => {
             const view = this._view;
+            this.#appState.value = { ...this.#appState.value, current_channel: ch._id };
             const { messages } = await fetch(
               `https://api.revolt.chat/channels/${ch._id}/messages?limit=30&include_users=true`,
               { headers: [["x-session-token", token]] },
